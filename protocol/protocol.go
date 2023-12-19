@@ -257,7 +257,8 @@ func (p *Parser) Parse(pkts []dsp.Packet) (msgs []Message) {
 
 type Message struct {
 	dsp.Packet
-	ID 	byte
+	ID 	       byte
+	BatteryLow bool
 }
 
 func NewMessage(pkt dsp.Packet) (m Message) {
@@ -265,6 +266,7 @@ func NewMessage(pkt dsp.Packet) (m Message) {
 	m.Data = make([]byte, len(pkt.Data)-2)
 	copy(m.Data, pkt.Data[2:])
 	m.ID = m.Data[0] & 0x7
+	m.BatteryLow = ((m.Data[0] >> 3) & 0x01 == 1)
 	return m
 }
 

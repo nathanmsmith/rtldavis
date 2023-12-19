@@ -33,10 +33,12 @@
 package main
 
 import (
+    "bytes"
     "flag"
     "io"
     "log"
     "math/rand"
+    "net"
     "os"
     "os/signal"
     "time"
@@ -60,7 +62,8 @@ var (
     verbose           *bool          // -v = emit verbose debug messages
     disableAfc        *bool          // -noafc = disable any automatic corrections
     deviceString      *string        // -d = device serial number or device index
-
+    graphiteSrv       *string        // -gs = decode the packets and send to graphite
+    graphitePrefix    *string        // -gp = prefix for graphite metrics
     // general
     actChan           [maxTr]int     // list with actual channels (0-7); 
                                      //   next values are zero (non-meaning)
@@ -120,7 +123,7 @@ var (
 
 
 func init() {
-    VERSION := "0.15"
+    VERSION := "0.15.1md"
 var (
     tr      int
     mask    int
@@ -148,6 +151,8 @@ var (
     verbose = flag.Bool("v", false, "emit verbose debug messages")
     disableAfc = flag.Bool("noafc", false, "disable any AFC")
     deviceString = flag.String("d","0","device serial number or device index")
+    graphiteSrv = flag.String("gs", "", "decode packets and send to graphite server")
+    graphitePrefix = flag.String("gp", "wx.davis.", "prefix for graphite metrics")
 
     flag.Parse()
     protocol.Verbose = *verbose
@@ -295,6 +300,15 @@ func main() {
         }
     }()
 
+    var graphiteChan chan []string
+    if *graphiteSrv != "" {
+        graphiteChan = make(chan []string)
+        go sendToGraphite(*graphiteSrv, *graphitePrefix, graphiteChan)
+        defer close(graphiteChan)
+    } else {
+        graphiteSrv = nil
+    }
+
     defer func() {
         in.Close()
         out.Close()
@@ -430,7 +444,9 @@ func main() {
                         if *undefined {
                             log.Printf("%02X %d %d %d %d %d msg.ID=%d undefined:%d", 
                                 msg.Data, chTotMsgs[0], chTotMsgs[1], chTotMsgs[2], chTotMsgs[3], totInit, msg.ID, idUndefs)
-                        } else {
+                        } else if graphiteSrv != nil {
+                            graphiteChan <- protocol.DecodeMsg(msg)
+												} else {
                             log.Printf("%02X %d %d %d %d %d msg.ID=%d", 
                                 msg.Data, chTotMsgs[0], chTotMsgs[1], chTotMsgs[2], chTotMsgs[3], totInit, msg.ID) 
                         }
@@ -488,4 +504,34 @@ func Min(values []int64) (ptr int) {
         }
     }
     return ptr
+}
+
+func sendToGraphite(server string, prefix string, graphiteChan chan[]string) {
+  var conn io.Writer
+	var err error
+	if server == "-" {
+		conn = os.Stdout
+	} else {
+		conn, err = net.Dial("udp", server)
+		if err != nil {
+			log.Printf("failed to open %s: %s", server, err)
+			os.Exit(1)
+			return
+		}
+	}
+  log.Printf("connected to %s for graphite output", server)
+	for msgs := range graphiteChan {
+		/* note that every call to conn.write generates a udp packet; the
+		   least we can do is bundle the messages that all arrive
+		   together */
+		var b bytes.Buffer
+		for _, line := range msgs {
+			fmt.Fprintf(&b, "%s%s %d\n", prefix, line, time.Now().Unix())
+		}
+		_, err = b.WriteTo(conn)
+		if err != nil {
+			log.Printf("failed to write to %s: %s", server, err)
+			os.Exit(1)
+		}
+	}
 }
