@@ -34,9 +34,6 @@ func DecodeMsg(m Message) (obs []string) {
 	}
 
 	windspeed_raw := m.Data[1]
-	/* TODO: weewx rtldavis.py has a giant complicated error correction
-	   matrix for windspeed.  But from comments it's not clear it
-	   applies to Vantage Vue? */
 	obs = append(obs, fmt.Sprintf("windspeed_raw %d", windspeed_raw))
 
 	winddir_vue := float64(m.Data[2])*1.40625 + 0.3
