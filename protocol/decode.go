@@ -1,3 +1,22 @@
+/*
+   This module decodes the binary data packets into weather messages.
+   Every packet carries one byte for wind speed, one byte for wind
+   direction, and one other sensor reading of 10 or more bits, labeled by
+   a message identifier.
+
+   The code is adapted from the weewx driver named weewx-rtldavis,
+   written by Luc Heijst (also the author of the upstream fork of
+   rtldavis):
+
+   https://github.com/lheijst/weewx-rtldavis
+
+   If a bug here is also present in the weewx-rtldavis reference code,
+   it should be fixed in both places.  If it is only in this code,
+   then it was introduced by me when translating from Python to Go.
+
+   2023-12-19 M. Dickerson <pomonamikey@gmail.com>
+*/
+
 package protocol
 
 import (
