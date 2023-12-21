@@ -7,7 +7,7 @@ This fork (mdickers47/rtldavis) is a fork of
 versions work is that they implement the Davis frequency hopping,
 demodulate the packets, and dump them to the log file as hex bytes.
 Something else has to decode the messages to create weather data.
-Luc wrote [https://github.com/lheijst/weewx-rtldavis][weewx-rtldavis]
+Luc wrote [https://github.com/lheijst/weewx-rtldavis](weewx-rtldavis)
 which is in Python and operates as a weewx driver to update a weewx
 database.
 
@@ -24,13 +24,13 @@ wx.davis.windspeed 0.00 1703133526
 wx.davis.temp 50.20 1703133526
 ```
 
-This is the Graphite/Carbon "line receiver" format, so, by supplying
-`-w server:udpport`, this rtldavis binary will send the data directly
+This is the Graphite/Carbon "line receiver" format.  If you specify
+`-g server:udpport`, this rtldavis binary will send the data directly
 to Graphite via UDP packets.
 
 *Beware* that I have only implemented the parsing for the Vantage Vue
 ISS sensor package with the 0.2 inch rain bucket, because that is what
-I have.  If the `-w` option is used with a different weather station,
+I have.  If the `-g` option is used with a different weather station,
 it will be wrong.
 
 - 2023-12-19 M. Dickerson
