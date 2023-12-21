@@ -1,8 +1,41 @@
 # rtldavis
 
-## rtldavis
+## About this Repository
 
-### About this Repository
+This fork (mdickers47/rtldavis) is a fork of
+[http://github.com/lheijst/rtldavis].  The way the lheijst and bemasher
+versions work is that they implement the Davis frequency hopping,
+demodulate the packets, and dump them to the log file as hex bytes.
+Something else has to decode the messages to create weather data.
+Luc wrote [https://github.com/lheijst/weewx-rtldavis][weewx-rtldavis]
+which is in Python and operates as a weewx driver to update a weewx
+database.
+
+My change is that I have adapted the packet parsing code from
+weewx-rtldavis into the go binary.  You can now write the decoded weather
+data to stdout with the option `-g -`.  It will be written as one data
+point per line, where each data point is three columns, which are metric
+name, value, and UNIX timestamp:
+
+```
+wx.davis.windspeed_raw 0 1703133526
+wx.davis.winddir 143.74 1703133526
+wx.davis.windspeed 0.00 1703133526
+wx.davis.temp 50.20 1703133526
+```
+
+This is the Graphite/Carbon "line receiver" format, so, by supplying
+`-w server:udpport`, this rtldavis binary will send the data directly
+to Graphite via UDP packets.
+
+*Beware* that I have only implemented the parsing for the Vantage Vue
+ISS sensor package with the 0.2 inch rain bucket, because that is what
+I have.  If the `-w` option is used with a different weather station,
+it will be wrong.
+
+- 2023-12-19 M. Dickerson
+
+From here on is the README from lheijst/rtldavis.
 
 This repository is a fork of [https://github.com/bemasher/rtldavis](https://github.com/bemasher/rtldavis) for use with custom receiver modules. It has been modified in numerous ways.
 1) Added EU frequencies
