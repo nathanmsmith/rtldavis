@@ -11,11 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: stable
         cache: true
+
+    - name: Install librtlsdr
+      run: sudo apt install -y  librtlsdr-dev
+
     - name: golangci-lint
       uses: golangci/golangci-lint-action@v6
       with:
