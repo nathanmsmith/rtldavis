@@ -38,7 +38,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
 	"net"
 	"os"
 	"os/signal"
@@ -131,7 +130,6 @@ func init() {
 	receiveWindow = 300                         // in ms
 
 	log.SetFlags(log.Lmicroseconds)
-	rand.Seed(time.Now().UnixNano())
 
 	// read program settings
 	flag.IntVar(&tr, "tr", 1, "transmitters to listen for: tr1=1, tr2=2, tr3=4, tr4=8, tr5=16 tr6=32, tr7=64, tr8=128")
