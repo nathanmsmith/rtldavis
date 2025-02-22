@@ -263,9 +263,18 @@ func main() {
 
 	in, out := io.Pipe()
 
-	go dev.ReadAsync(func(buf []byte) {
-		out.Write(buf)
-	}, nil, 1, p.Cfg.BlockSize2)
+	go func() {
+		err := dev.ReadAsync(func(buf []byte) {
+			_, err := out.Write(buf)
+			if err != nil {
+				log.Printf("Error in writing buffer: %v\n", err)
+			}
+		}, nil, 1, p.Cfg.BlockSize2)
+		if err != nil {
+			log.Printf("Error in ReadAsync: %v\n", err)
+			return
+		}
+	}()
 
 	// Handle frequency hops concurrently since the callback will stall if we
 	// stop reading to hop.
@@ -390,7 +399,11 @@ func main() {
 			}
 
 		default:
-			in.Read(block)
+			_, err := in.Read(block)
+			if err != nil {
+				log.Printf("Error reading block: %v", err)
+			}
+
 			handleNxtPacket = false
 			for _, msg := range p.Parse(p.Demodulate(block)) {
 				if testFreq {
