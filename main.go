@@ -467,10 +467,6 @@ func main() {
 	}
 }
 
-func convTim(unixTime int64) (t time.Time) {
-	return time.Unix(0, unixTime*int64(time.Nanosecond))
-}
-
 func HandleNextHopChannel() {
 	// calculate chNextVisits times
 	for i := 0; i < 8; i++ {
