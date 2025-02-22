@@ -41,6 +41,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	rtlsdr "github.com/jpoirier/gortlsdr"
@@ -319,7 +320,7 @@ func main() {
 	}()
 
 	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt, os.Kill)
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 
 	block := make([]byte, p.Cfg.BlockSize2)
 	initTransmitrs = true
