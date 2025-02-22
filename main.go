@@ -237,7 +237,7 @@ func main() {
 			for i := 0; i < len(gains); i++ {
 				gainInfo += fmt.Sprintf("%d Db ", int(gains[i]))
 			}
-			log.Printf(gainInfo)
+			log.Printf("%s", gainInfo)
 		}
 		err = dev.SetTunerGain(gain)
 		if err != nil {
