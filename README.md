@@ -2,20 +2,18 @@
 
 ## About this Repository
 
-This fork (mdickers47/rtldavis) is a fork of
-[http://github.com/lheijst/rtldavis].  The way the lheijst and bemasher
-versions work is that they implement the Davis frequency hopping,
+This is a fork of [mdickers47/rtldavis](https://github.com/mdickers47/rtldavis) which is a fork in turn of [lheijst/rtldavis](https://github.com/lheijst/rtldavis) and [bemasher/rtldavis](https://github.com/bemasher/rtldavis).
+
+The way the lheijst and bemasher versions work is that they implement the Davis frequency hopping,
 demodulate the packets, and dump them to the log file as hex bytes.
 Something else has to decode the messages to create weather data.
 Luc wrote [https://github.com/lheijst/weewx-rtldavis](weewx-rtldavis)
 which is in Python and operates as a weewx driver to update a weewx
 database.
 
-My change is that I have adapted the packet parsing code from
-weewx-rtldavis into the go binary.  You can now write the decoded weather
-data to stdout with the option `-g -`.  It will be written as one data
-point per line, where each data point is three columns, which are metric
-name, value, and UNIX timestamp:
+mdickers47's change was to adapt the packet parsing code from
+weewx-rtldavis into the go binary. He also has code to upload data to a Graphite server.
+It will be written as one data point per line, where each data point is three columns, which are metric name, value, and UNIX timestamp:
 
 ```
 wx.davis.windspeed_raw 0 1703133526
@@ -24,91 +22,23 @@ wx.davis.windspeed 0.00 1703133526
 wx.davis.temp 50.20 1703133526
 ```
 
-This is the Graphite/Carbon "line receiver" format.  If you specify
-`-g server:udpport`, this rtldavis binary will send the data directly
-to Graphite via UDP packets.
+You can also write the decoded weather data to stdout with the option `-gs -`.  
 
-*Beware* that I have only implemented the parsing for the Vantage Vue
-ISS sensor package with the 0.2 inch rain bucket, because that is what
-I have.  If the `-g` option is used with a different weather station,
-it will be wrong.
+My change will to be to upload data to a server using HTTP and JSON. For my uses, this will be a Rails server hosted on a VPS.
 
-- 2023-12-19 M. Dickerson
-
-From here on is the README from lheijst/rtldavis.
-
-This repository is a fork of [https://github.com/bemasher/rtldavis](https://github.com/bemasher/rtldavis) for use with custom receiver modules. It has been modified in numerous ways.
-1) Added EU frequencies
-2) Handling of more than one concurrent transmitters.
-3) Output format is changed for use with the weewx-rtldavis driver which does the data parsing. 
-
+Tested and used on a Davis Vantage Vue. Installed on macOS, using go 1.24.0.
 
 ## Installation
 
-#### Install packages needed for rtldavis
+```
+brew install librtlsdr
+git clone https://github.com/nathanmsmith/rtldavis/
+env CGO_CFLAGS="-I/opt/homebrew/include" CGO_LDFLAGS="-L/opt/homebrew/lib" go install -v .
+$GOPATH/bin/rtldavis
+```
 
-    sudo apt-get install golang git cmake librtlsdr-dev
 
-#### Setup Udev Rules
-
-Next, you need to add some udev rules to make the dongle available for the non-root users. First you want to find the vendor id and product id for your dongle.
-The way I did this was to run:
-
-    lsusb
-
-The last line was the Realtek dongle:
-    Bus 001 Device 008: ID 0bda:2838 Realtek Semiconductor Corp.
-    Bus 001 Device 005: ID 0bda:2838 Realtek Semiconductor Corp. RTL2838 DVB-T
-
-The important parts are "0bda" (the vendor id) and "2838" (the product id).
-
-Create a new file as root named /etc/udev/rules.d/20.rtlsdr.rules that contains the following line:
-    nano /etc/udev/rules.d/20.rtlsdr.rules
-    SUBSYSTEM=="usb", ATTRS{idVendor}=="0bda", ATTRS{idProduct}=="2838", GROUP="adm", MODE="0666", SYMLINK+="rtl_sdr"
-
-With the vendor and product ids for your particular dongle. This should make the dongle accessible to any user in the adm group. and add a /dev/rtl_sdr symlink when the dongle is attached.
-
-#### Get librtlsdr
-
-    cd /home/pi
-    git clone https://github.com/steve-m/librtlsdr.git
-    cd librtlsdr
-    mkdir build
-    cd build
-    cmake ../ -DINSTALL_UDEV_RULES=ON
-    make
-    sudo make install
-    sudo ldconfig
-
-#### Change / create ~/profile
-
-    sudo nano ~/.profile
-    add at the end of the file:
-    
-    export GOROOT=/usr/lib/go
-    export GOPATH=$HOME/work
-    export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
-    
-#### Activate changed / new ~/profile
-    source ~/.profile
-
-#### Get the rtldavis package
-
-    cd /home/pi
-    go get -v github.com/lheijst/rtldavis
-
-#### Compiling GO sources
-
-    cd $GOPATH/src/github.com/lheijst/rtldavis
-    git submodule init
-    git submodule update
-    go install -v .
-
-#### Start program rtldavis
-
-    $GOPATH/bin/rtldavis
-
-#### Usage
+## Usage
 
 Available command-line flags are as follows:
 
@@ -155,27 +85,4 @@ Usage of rtldavis:
 
 ### License
 
-The source of this project is licensed under GPL v3.0. According to [http://choosealicense.com/licenses/gpl-3.0/](http://choosealicense.com/licenses/gpl-3.0/) you may:
-
-#### Required:
-
- * **Disclose Source:** Source code must be made available when distributing the software. In the case of LGPL and 
- OSL 3.0, the source for the library (and not the entire program) must be made available.
- * **License and copyright notice:** Include a copy of the license and copyright notice with the code.
- * **State Changes:** Indicate significant changes made to the code.
-
-#### Permitted:
-
- * **Commercial Use:** This software and derivatives may be used for commercial purposes.
- * **Distribution:** You may distribute this software.
- * **Modification:** This software may be modified.
- * **Patent Use:** This license provides an express grant of patent rights from the contributor to the recipient.
- * **Private Use:** You may use and modify the software without distributing it.
-
-#### Forbidden:
-
- * **Hold Liable:** Software is provided without warranty and the software author\/license owner cannot be held liable for damages.
-
-### Feedback
-If you have any general questions or feedback leave a comment below. For bugs, feature suggestions and anything 
-directly relating to the program itself, submit an issue.
+The source of this project is licensed under GPL v3.0. See the LICENSE file for details.

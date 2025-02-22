@@ -45,7 +45,7 @@ import (
     "strconv"
     "fmt"
 
-    "github.com/mdickers47/rtldavis/protocol"
+    "github.com/nathanmsmith/rtldavis/protocol"
     "github.com/jpoirier/gortlsdr"
 )
 const maxTr = 8
@@ -123,7 +123,7 @@ var (
 
 
 func init() {
-    VERSION := "0.15.2md"
+    VERSION := "0.15.2nms"
 var (
     tr      int
     mask    int
