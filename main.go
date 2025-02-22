@@ -92,7 +92,8 @@ var (
 	totInit int // total of init procedures since startup (first not counted)
 
 	// hop and channel-frequency
-	loopTimer      time.Time     // time when next hop sequence will time-out
+	// This field was originally in code, but unused
+	// loopTimer      time.Time     // time when next hop sequence will time-out
 	loopPeriod     time.Duration // period since now when next hop sequence will time-out
 	actHopChanIdx  int           // channel-id of actual hop sequence (EU: 0-4, US and NZ: 0-50)
 	nextHopChan    int           // channel-id of next hop
