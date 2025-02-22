@@ -41,7 +41,6 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"strconv"
 	"time"
 
 	rtlsdr "github.com/jpoirier/gortlsdr"
@@ -185,22 +184,23 @@ func init() {
 }
 
 func main() {
-	var sdrIndex int = -1
+	// var sdrIndex int
 	p := protocol.NewParser(14, *transmitterFreq)
 	p.Cfg.Log()
 
 	fs := p.Cfg.SampleRate
 
+	// nms: I don't think this code does anything! sdrIndex isn't used anywhere
 	// First attempt to open the device as a Serial Number
-	sdrIndex, _ = rtlsdr.GetIndexBySerial(*deviceString)
-	if sdrIndex < 0 {
-		indexreturn, err := strconv.Atoi(*deviceString)
-		if err != nil {
-			log.Printf("Could not parse device\n")
-			log.Fatal(err)
-		}
-		sdrIndex = indexreturn
-	}
+	// sdrIndex, _ = rtlsdr.GetIndexBySerial(*deviceString)
+	// if sdrIndex < 0 {
+	// 	indexreturn, err := strconv.Atoi(*deviceString)
+	// 	if err != nil {
+	// 		log.Printf("Could not parse device\n")
+	// 		log.Fatal(err)
+	// 	}
+	// 	sdrIndex = indexreturn
+	// }
 
 	dev, err := rtlsdr.Open(0)
 	if err != nil {
