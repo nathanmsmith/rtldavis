@@ -98,8 +98,6 @@ func Quantize(input []float64, output []byte) {
 	for idx, val := range input {
 		output[idx] = byte(math.Float64bits(val) >> 63)
 	}
-
-	return
 }
 
 func (d *Demodulator) Pack(input []byte) {
@@ -108,8 +106,6 @@ func (d *Demodulator) Pack(input []byte) {
 			slice[symbolIdx] = input[symbolIdx*d.Cfg.SymbolLength+symbolOffset]
 		}
 	}
-
-	return
 }
 
 func (d *Demodulator) Search() (indexes []int) {

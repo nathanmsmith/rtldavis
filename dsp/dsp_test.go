@@ -2,7 +2,6 @@ package dsp
 
 import (
 	"testing"
-	"time"
 
 	crand "crypto/rand"
 	"math/cmplx"
@@ -18,8 +17,6 @@ var cfg = NewPacketConfig(
 )
 
 func TestRotateFs4(t *testing.T) {
-	mrand.Seed(time.Now().UnixNano())
-
 	input := make([]complex128, 512)
 	output := make([]complex128, 512)
 
@@ -45,7 +42,10 @@ func BenchmarkByteToCmplxLUT(b *testing.B) {
 	input := make([]byte, 512)
 	output := make([]complex128, 256)
 
-	crand.Read(input)
+	_, err := crand.Read(input)
+	if err != nil {
+		b.Fatalf("Error with crand.Read: %v", err)
+	}
 
 	b.SetBytes(512)
 	b.ReportAllocs()

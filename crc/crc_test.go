@@ -3,7 +3,6 @@ package crc
 import (
 	"encoding/binary"
 	"testing"
-	"time"
 
 	crand "crypto/rand"
 	mrand "math/rand"
@@ -27,7 +26,11 @@ func TestIdentity(t *testing.T) {
 			length := mrand.Intn(32)&0xFE + 8
 
 			buf := make([]byte, length)
-			crand.Read(buf[:length-2])
+
+			_, err := crand.Read(buf[:length-2])
+			if err != nil {
+				t.Fatalf("Error with crand.Read: %v", err)
+			}
 
 			intermediate := crc.Checksum(buf[:length-2])
 			binary.BigEndian.PutUint16(buf[length-2:], intermediate)
@@ -42,7 +45,10 @@ func TestIdentity(t *testing.T) {
 
 func BenchmarkBCH(b *testing.B) {
 	input := make([]byte, 16384)
-	crand.Read(input)
+	_, err := crand.Read(input)
+	if err != nil {
+		b.Fatalf("Error with crand.Read: %v", err)
+	}
 
 	bch := NewCRC("BCH", 0, 0x6F63, 0)
 
@@ -56,7 +62,10 @@ func BenchmarkBCH(b *testing.B) {
 
 func BenchmarkCCITT(b *testing.B) {
 	input := make([]byte, 16384)
-	crand.Read(input)
+	_, err := crand.Read(input)
+	if err != nil {
+		b.Fatalf("Error with crand.Read: %v", err)
+	}
 
 	ccitt := NewCRC("CCITT", 0xFFFF, 0x1021, 0x1D0F)
 
@@ -66,8 +75,4 @@ func BenchmarkCCITT(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		ccitt.Checksum(input)
 	}
-}
-
-func init() {
-	mrand.Seed(time.Now().UnixNano())
 }
