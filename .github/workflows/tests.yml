@@ -1,0 +1,56 @@
+name: Tests
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+jobs:
+  lint:
+    name: Lint Go files
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: stable
+        cache: true
+
+    - name: Install librtlsdr
+      run: sudo apt install -y  librtlsdr-dev
+
+    - name: golangci-lint
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: v1.64
+
+  test:
+    name: Run Go Tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: stable
+        cache: true
+
+    - name: Install librtlsdr
+      run: sudo apt install -y  librtlsdr-dev
+
+    - name: Install dependencies
+      run: go mod download
+
+    - name: Run unit tests
+      run: go test -v -race -coverprofile=coverage.txt -covermode=atomic ./...
+
+    # - name: Upload coverage reports
+    #   uses: codecov/codecov-action@v4
+    #   with:
+    #     file: ./coverage.txt
+    #     flags: unittests
+    #     name: codecov-umbrella
+    #     fail_ci_if_error: false

@@ -70,12 +70,14 @@ type Parser struct {
 	reverseHopPatrn []int
 	freqCorr        int
 	transmitter     int
-	chfreq          int
+	// This field was originally in code, but unused
+	// chfreq          int
 	freqerrTrChList [maxTr][maxCh][maxTrCh]int
-	freqerrTrChSum  [maxTr][maxCh]int
-	freqerrTrChPtr  [maxTr][maxCh]int
-	maxTrChList     int
-	factor          float32
+	// This field was originally in code, but unused
+	// freqerrTrChSum  [maxTr][maxCh]int
+	freqerrTrChPtr [maxTr][maxCh]int
+	maxTrChList    int
+	factor         float32
 }
 
 func NewParser(symbolLength int, tf string) (p Parser) {

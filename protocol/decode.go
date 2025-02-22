@@ -58,7 +58,7 @@ func DecodeMsg(m Message) (obs []string) {
 		/* UV radiation */
 		obs = append(obs, fmt.Sprintf("uv_raw %d", raw))
 		if raw != 0x03FF {
-			obs = append(obs, fmt.Sprintf("uv %0.2f", raw/50.0))
+			obs = append(obs, fmt.Sprintf("uv %0.2f", float32(raw)/50.0))
 		}
 	case 0x05:
 		/* rain rate */

@@ -41,7 +41,7 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"strconv"
+	"syscall"
 	"time"
 
 	rtlsdr "github.com/jpoirier/gortlsdr"
@@ -92,7 +92,8 @@ var (
 	totInit int // total of init procedures since startup (first not counted)
 
 	// hop and channel-frequency
-	loopTimer      time.Time     // time when next hop sequence will time-out
+	// This field was originally in code, but unused
+	// loopTimer      time.Time     // time when next hop sequence will time-out
 	loopPeriod     time.Duration // period since now when next hop sequence will time-out
 	actHopChanIdx  int           // channel-id of actual hop sequence (EU: 0-4, US and NZ: 0-50)
 	nextHopChan    int           // channel-id of next hop
@@ -184,22 +185,23 @@ func init() {
 }
 
 func main() {
-	var sdrIndex int = -1
+	// var sdrIndex int
 	p := protocol.NewParser(14, *transmitterFreq)
 	p.Cfg.Log()
 
 	fs := p.Cfg.SampleRate
 
+	// nms: I don't think this code does anything! sdrIndex isn't used anywhere
 	// First attempt to open the device as a Serial Number
-	sdrIndex, _ = rtlsdr.GetIndexBySerial(*deviceString)
-	if sdrIndex < 0 {
-		indexreturn, err := strconv.Atoi(*deviceString)
-		if err != nil {
-			log.Printf("Could not parse device\n")
-			log.Fatal(err)
-		}
-		sdrIndex = indexreturn
-	}
+	// sdrIndex, _ = rtlsdr.GetIndexBySerial(*deviceString)
+	// if sdrIndex < 0 {
+	// 	indexreturn, err := strconv.Atoi(*deviceString)
+	// 	if err != nil {
+	// 		log.Printf("Could not parse device\n")
+	// 		log.Fatal(err)
+	// 	}
+	// 	sdrIndex = indexreturn
+	// }
 
 	dev, err := rtlsdr.Open(0)
 	if err != nil {
@@ -235,7 +237,7 @@ func main() {
 			for i := 0; i < len(gains); i++ {
 				gainInfo += fmt.Sprintf("%d Db ", int(gains[i]))
 			}
-			log.Printf(gainInfo)
+			log.Printf("%s", gainInfo)
 		}
 		err = dev.SetTunerGain(gain)
 		if err != nil {
@@ -261,9 +263,18 @@ func main() {
 
 	in, out := io.Pipe()
 
-	go dev.ReadAsync(func(buf []byte) {
-		out.Write(buf)
-	}, nil, 1, p.Cfg.BlockSize2)
+	go func() {
+		err := dev.ReadAsync(func(buf []byte) {
+			_, err := out.Write(buf)
+			if err != nil {
+				log.Printf("Error in writing buffer: %v\n", err)
+			}
+		}, nil, 1, p.Cfg.BlockSize2)
+		if err != nil {
+			log.Printf("Error in ReadAsync: %v\n", err)
+			return
+		}
+	}()
 
 	// Handle frequency hops concurrently since the callback will stall if we
 	// stop reading to hop.
@@ -318,7 +329,7 @@ func main() {
 	}()
 
 	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, os.Interrupt, os.Kill)
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
 
 	block := make([]byte, p.Cfg.BlockSize2)
 	initTransmitrs = true
@@ -388,7 +399,11 @@ func main() {
 			}
 
 		default:
-			in.Read(block)
+			_, err := in.Read(block)
+			if err != nil {
+				log.Printf("Error reading block: %v", err)
+			}
+
 			handleNxtPacket = false
 			for _, msg := range p.Parse(p.Demodulate(block)) {
 				if testFreq {
@@ -464,10 +479,6 @@ func main() {
 			}
 		}
 	}
-}
-
-func convTim(unixTime int64) (t time.Time) {
-	return time.Unix(0, unixTime*int64(time.Nanosecond))
 }
 
 func HandleNextHopChannel() {
