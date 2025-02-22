@@ -123,7 +123,7 @@ var (
 
 
 func init() {
-    VERSION := "0.15.2md"
+    VERSION := "0.15.2nms"
 var (
     tr      int
     mask    int
