@@ -97,6 +97,8 @@ func (bp *BatchProcessor) sendBatch() {
 	}
 	defer resp.Body.Close()
 
+	log.Printf("Successfully sent messages: %s", payload)
+
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("Server returned non-OK status: %d", resp.StatusCode)
 		return
@@ -106,8 +108,10 @@ func (bp *BatchProcessor) sendBatch() {
 	bp.messages = make([]string, 0)
 }
 
-func (bp *BatchProcessor) AddMessage(msg string) {
-	bp.messageChan <- msg
+func (bp *BatchProcessor) AddMessages(messages []string) {
+	for _, message := range messages {
+		bp.messageChan <- message
+	}
 }
 
 func (bp *BatchProcessor) Stop() {

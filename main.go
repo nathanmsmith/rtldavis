@@ -33,6 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"io"
@@ -46,6 +47,7 @@ import (
 	"github.com/nathanmsmith/rtldavis/protocol"
 )
 
+// nms: max transmitter?
 const maxTr = 8
 
 var (
@@ -60,10 +62,11 @@ var (
 	verbose         *bool   // -v = emit verbose debug messages
 	disableAfc      *bool   // -noafc = disable any automatic corrections
 	deviceString    *string // -d = device serial number or device index
-	graphiteSrv     *string // -gs = decode the packets and send to graphite
-	graphitePrefix  *string // -gp = prefix for graphite metrics
+	serverSrv       *string // -gs = decode the packets and send to server
+	serverPrefix    *string // -gp = prefix for server metrics
 	// general
 	actChan [maxTr]int // list with actual channels (0-7);
+	// nms: not sure what this comment means
 	//   next values are zero (non-meaning)
 	msgIdToChan []int // msgIdToChan[id] is pointer to channel in actChan;
 	//   non-defined id's have ptr value 9
@@ -100,7 +103,7 @@ var (
 	freqCorr       int           // frequency error of last hop
 	freqCorrection int           // frequencyCorrection (average freqError per transmitter per channel)
 
-	// controll
+	// control
 	initTransmitrs  bool // start an init session to synchronize all defined channels
 	handleNxtPacket bool // start preparation for reading next data packet
 
@@ -142,13 +145,13 @@ func init() {
 	flag.IntVar(&startFreq, "startfreq", 0, "test")
 	flag.IntVar(&endFreq, "endfreq", 0, "test")
 	flag.IntVar(&stepFreq, "stepfreq", 0, "test")
-	transmitterFreq = flag.String("tf", "EU", "transmitter frequencies: EU, US or NZ")
+	transmitterFreq = flag.String("tf", "US", "transmitter frequencies: EU, US or NZ")
 	undefined = flag.Bool("u", false, "log undefined signals")
 	verbose = flag.Bool("v", false, "emit verbose debug messages")
 	disableAfc = flag.Bool("noafc", false, "disable any AFC")
 	deviceString = flag.String("d", "0", "device serial number or device index")
-	graphiteSrv = flag.String("gs", "", "decode packets and send to graphite server")
-	graphitePrefix = flag.String("gp", "wx.davis.", "prefix for graphite metrics")
+	serverSrv = flag.String("gs", "", "decode packets and send to server server")
+	serverPrefix = flag.String("gp", "wx.davis.", "prefix for server metrics")
 
 	flag.Parse()
 	protocol.Verbose = *verbose
@@ -309,14 +312,20 @@ func main() {
 		}
 	}()
 
-	var graphiteChan chan protocol.DecodedPacket
-	if *graphiteSrv != "" {
-		graphiteChan = make(chan protocol.DecodedPacket)
-		go sendToGraphite(*graphiteSrv, *graphitePrefix, graphiteChan)
-		defer close(graphiteChan)
-	} else {
-		graphiteSrv = nil
-	}
+	processor := NewBatchProcessor(
+		"http://example.com/api/batch",
+		5*time.Second, // Send every 5 seconds
+		100,           // or when batch size reaches 100
+	)
+
+	// var serverChan chan []string
+	// if *serverSrv != "" {
+	// 	serverChan = make(chan []string)
+	// 	go sendToServer(*serverSrv, *serverPrefix, serverChan)
+	// 	defer close(serverChan)
+	// } else {
+	// 	serverSrv = nil
+	// }
 
 	defer func() {
 		in.Close()
@@ -457,8 +466,8 @@ func main() {
 						if *undefined {
 							log.Printf("%02X %d %d %d %d %d msg.ID=%d undefined:%d",
 								msg.Data, chTotMsgs[0], chTotMsgs[1], chTotMsgs[2], chTotMsgs[3], totInit, msg.ID, idUndefs)
-						} else if graphiteSrv != nil {
-							graphiteChan <- protocol.DecodeMsg(msg)
+						} else if serverSrv != nil {
+							processor.AddMessages(protocol.DecodeMsg(msg))
 						} else {
 							log.Printf("%02X %d %d %d %d %d msg.ID=%d",
 								msg.Data, chTotMsgs[0], chTotMsgs[1], chTotMsgs[2], chTotMsgs[3], totInit, msg.ID)
@@ -515,14 +524,27 @@ func Min(values []int64) (ptr int) {
 	return ptr
 }
 
-func sendToGraphite(server string, prefix string, graphiteChan chan protocol.DecodedPacket) {
-	log.Printf("connected to %s for graphite output", server)
-
-	for packet := range graphiteChan {
-		if packet.Temperature != nil {
-			log.Printf("[%d] temperature = %.1f\n", time.Now().Unix(), *packet.Temperature)
-		} else {
-			log.Printf("Skipping, no temperature in packet")
+func sendToServer(server string, prefix string, serverChan chan []string) {
+	var conn io.Writer
+	var err error
+	if server == "-" {
+		conn = os.Stdout
+	} else {
+		// post to server
+	}
+	log.Printf("connected to %s for server output", server)
+	for msgs := range serverChan {
+		/* note that every call to conn.write generates a udp packet; the
+		   least we can do is bundle the messages that all arrive
+		   together */
+		var b bytes.Buffer
+		for _, line := range msgs {
+			fmt.Fprintf(&b, "%s%s %d\n", prefix, line, time.Now().Unix())
+		}
+		_, err = b.WriteTo(conn)
+		if err != nil {
+			log.Printf("failed to write to %s: %s", server, err)
+			os.Exit(1)
 		}
 	}
 }
