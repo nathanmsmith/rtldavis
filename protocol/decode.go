@@ -60,7 +60,7 @@ func DecodeMsg(m Message) (packet DecodedPacket) {
 
 	/* apply the error correction table that might not even be for the
 	   Vantage Vue; it's unclear */
-	windspeed := CorrectWindspeed(m.Data[1], m.Data[2])
+	windspeed, _ := DecodeWindspeed(m)
 	packet.WindSpeed = windspeed
 
 	msg_type := (m.Data[0] >> 4) & 0x0F
