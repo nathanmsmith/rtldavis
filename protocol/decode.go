@@ -34,7 +34,7 @@ type DecodedPacket struct {
 	WindDirection float64 `json:"wind_direction"`
 
 	// When the packet was received
-	ReceivedAt time.Time `json:"received_at"`
+	ReceivedAt int64 `json:"received_at"`
 
 	Temperature *float32 `json:"temperature"`
 }
@@ -53,7 +53,7 @@ func FormatMessage(m Message) string {
 }
 
 func DecodeMsg(m Message) (packet DecodedPacket) {
-	packet.ReceivedAt = time.Now()
+	packet.ReceivedAt = time.Now().Unix()
 	slog.Info("Received a message, decoding", "message", FormatMessage(m))
 
 	/* sensor messages arrive with 'channel' numbers, which has no
@@ -75,20 +75,11 @@ func DecodeMsg(m Message) (packet DecodedPacket) {
 	windspeed, _ := DecodeWindspeed(m)
 	packet.WindSpeed = windspeed
 
-	// 	Temperature sensor - Measures outdoor air temperature
-	// Humidity sensor - Measures relative humidity
-	// Barometric pressure sensor - Tracks atmospheric pressure
-	// Rain gauge - Measures precipitation amounts
-	// Anemometer - Measures wind speed
-	// Wind vane - Determines wind direction
-	// Solar radiation sensor (via calculated values, not a direct sensor)
-
 	msg_type, err := DecodeMessageType(m)
 	if err != nil {
 		slog.Error("UNKNOWN MESSAGE TYPE", "error", err, "fullMessage", FormatMessage(m))
 	}
 	/* most of the time we will use the 10-bit number in this weird place */
-	// raw := ((int16(m.Data[3]) << 2) + int16(m.Data[4])>>6) & 0x03FF
 	switch msg_type {
 	case 0x02:
 		/* supercap voltage */
@@ -96,6 +87,9 @@ func DecodeMsg(m Message) (packet DecodedPacket) {
 		// if raw != 0x03FF {
 		// 	obs = append(obs, fmt.Sprintf("supercap_v %0.2f", float32(raw)/300.0))
 		// }
+	case 0x03:
+		raw := ((int16(m.Data[3]) << 2) + int16(m.Data[4])>>6) & 0x03FF
+		log.Printf("raw: %d", raw)
 	case 0x04:
 		/* UV radiation */
 		// obs = append(obs, fmt.Sprintf("uv_raw %d", raw))

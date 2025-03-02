@@ -5,6 +5,12 @@ import (
 	"slices"
 )
 
+// Barometric pressure sensor - Tracks atmospheric pressure
+// Rain gauge - Measures precipitation amounts
+// Anemometer - Measures wind speed
+// Wind vane - Determines wind direction
+// Solar radiation sensor (via calculated values, not a direct sensor)
+
 // Decode the type of a message.
 // Returns an error if the message type is not recognized.
 func DecodeMessageType(m Message) (messageType byte, err error) {
