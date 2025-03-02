@@ -33,7 +33,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"io"
@@ -63,7 +62,6 @@ var (
 	disableAfc      *bool   // -noafc = disable any automatic corrections
 	deviceString    *string // -d = device serial number or device index
 	serverSrv       *string // -gs = decode the packets and send to server
-	serverPrefix    *string // -gp = prefix for server metrics
 	// general
 	actChan [maxTr]int // list with actual channels (0-7);
 	// nms: not sure what this comment means
@@ -151,7 +149,6 @@ func init() {
 	disableAfc = flag.Bool("noafc", false, "disable any AFC")
 	deviceString = flag.String("d", "0", "device serial number or device index")
 	serverSrv = flag.String("gs", "", "decode packets and send to server server")
-	serverPrefix = flag.String("gp", "wx.davis.", "prefix for server metrics")
 
 	flag.Parse()
 	protocol.Verbose = *verbose
@@ -318,15 +315,6 @@ func main() {
 		100,           // or when batch size reaches 100
 	)
 
-	// var serverChan chan []string
-	// if *serverSrv != "" {
-	// 	serverChan = make(chan []string)
-	// 	go sendToServer(*serverSrv, *serverPrefix, serverChan)
-	// 	defer close(serverChan)
-	// } else {
-	// 	serverSrv = nil
-	// }
-
 	defer func() {
 		in.Close()
 		out.Close()
@@ -467,7 +455,7 @@ func main() {
 							log.Printf("%02X %d %d %d %d %d msg.ID=%d undefined:%d",
 								msg.Data, chTotMsgs[0], chTotMsgs[1], chTotMsgs[2], chTotMsgs[3], totInit, msg.ID, idUndefs)
 						} else if serverSrv != nil {
-							processor.AddMessages(protocol.DecodeMsg(msg))
+							processor.AddPacket(protocol.DecodeMsg(msg))
 						} else {
 							log.Printf("%02X %d %d %d %d %d msg.ID=%d",
 								msg.Data, chTotMsgs[0], chTotMsgs[1], chTotMsgs[2], chTotMsgs[3], totInit, msg.ID)
@@ -522,29 +510,4 @@ func Min(values []int64) (ptr int) {
 		}
 	}
 	return ptr
-}
-
-func sendToServer(server string, prefix string, serverChan chan []string) {
-	var conn io.Writer
-	var err error
-	if server == "-" {
-		conn = os.Stdout
-	} else {
-		// post to server
-	}
-	log.Printf("connected to %s for server output", server)
-	for msgs := range serverChan {
-		/* note that every call to conn.write generates a udp packet; the
-		   least we can do is bundle the messages that all arrive
-		   together */
-		var b bytes.Buffer
-		for _, line := range msgs {
-			fmt.Fprintf(&b, "%s%s %d\n", prefix, line, time.Now().Unix())
-		}
-		_, err = b.WriteTo(conn)
-		if err != nil {
-			log.Printf("failed to write to %s: %s", server, err)
-			os.Exit(1)
-		}
-	}
 }

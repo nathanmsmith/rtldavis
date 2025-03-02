@@ -7,26 +7,28 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/nathanmsmith/rtldavis/protocol"
 )
 
 type BatchProcessor struct {
-	messages    []string
-	mutex       sync.Mutex
-	batchSize   int
-	interval    time.Duration
-	serverURL   string
-	messageChan chan string
-	done        chan struct{}
+	packet     []protocol.DecodedPacket
+	mutex      sync.Mutex
+	batchSize  int
+	interval   time.Duration
+	serverURL  string
+	packetChan chan protocol.DecodedPacket
+	done       chan struct{}
 }
 
 func NewBatchProcessor(serverURL string, interval time.Duration, batchSize int) *BatchProcessor {
 	bp := &BatchProcessor{
-		messages:    make([]string, 0),
-		batchSize:   batchSize,
-		interval:    interval,
-		serverURL:   serverURL,
-		messageChan: make(chan string, batchSize),
-		done:        make(chan struct{}),
+		packet:     make([]protocol.DecodedPacket, 0),
+		batchSize:  batchSize,
+		interval:   interval,
+		serverURL:  serverURL,
+		packetChan: make(chan protocol.DecodedPacket, batchSize),
+		done:       make(chan struct{}),
 	}
 
 	// Start the background processing
@@ -39,12 +41,12 @@ func NewBatchProcessor(serverURL string, interval time.Duration, batchSize int) 
 func (bp *BatchProcessor) processMessages() {
 	for {
 		select {
-		case msg := <-bp.messageChan:
+		case packet := <-bp.packetChan:
 			bp.mutex.Lock()
-			bp.messages = append(bp.messages, msg)
+			bp.packet = append(bp.packet, packet)
 
 			// If we've reached batch size, send immediately
-			if len(bp.messages) >= bp.batchSize {
+			if len(bp.packet) >= bp.batchSize {
 				bp.sendBatch()
 			}
 			bp.mutex.Unlock()
@@ -63,7 +65,7 @@ func (bp *BatchProcessor) sendBatchPeriodically() {
 		select {
 		case <-ticker.C:
 			bp.mutex.Lock()
-			if len(bp.messages) > 0 {
+			if len(bp.packet) > 0 {
 				bp.sendBatch()
 			}
 			bp.mutex.Unlock()
@@ -74,14 +76,14 @@ func (bp *BatchProcessor) sendBatchPeriodically() {
 }
 
 func (bp *BatchProcessor) sendBatch() {
-	if len(bp.messages) == 0 {
+	if len(bp.packet) == 0 {
 		return
 	}
 
 	// Prepare the payload
 	payload, err := json.Marshal(map[string]interface{}{
-		"messages": bp.messages,
-		"count":    len(bp.messages),
+		"messages": bp.packet,
+		"count":    len(bp.packet),
 		"time":     time.Now(),
 	})
 	if err != nil {
@@ -105,13 +107,11 @@ func (bp *BatchProcessor) sendBatch() {
 	}
 
 	// Clear the messages slice after successful send
-	bp.messages = make([]string, 0)
+	bp.packet = make([]protocol.DecodedPacket, 0)
 }
 
-func (bp *BatchProcessor) AddMessages(messages []string) {
-	for _, message := range messages {
-		bp.messageChan <- message
-	}
+func (bp *BatchProcessor) AddPacket(packet protocol.DecodedPacket) {
+	bp.packetChan <- packet
 }
 
 func (bp *BatchProcessor) Stop() {
@@ -120,7 +120,7 @@ func (bp *BatchProcessor) Stop() {
 	// Send any remaining messages
 	bp.mutex.Lock()
 	defer bp.mutex.Unlock()
-	if len(bp.messages) > 0 {
+	if len(bp.packet) > 0 {
 		bp.sendBatch()
 	}
 }
