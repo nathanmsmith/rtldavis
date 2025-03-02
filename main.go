@@ -310,7 +310,7 @@ func main() {
 	}()
 
 	processor := NewBatchProcessor(
-		"http://example.com/api/batch",
+		*serverSrv,
 		5*time.Second, // Send every 5 seconds
 		100,           // or when batch size reaches 100
 	)
