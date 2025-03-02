@@ -82,9 +82,9 @@ func (bp *BatchProcessor) sendBatch() {
 
 	// Prepare the payload
 	payload, err := json.Marshal(map[string]interface{}{
-		"messages": bp.packet,
-		"count":    len(bp.packet),
-		"time":     time.Now(),
+		"packets":         bp.packet,
+		"count":           len(bp.packet),
+		"payload_sent_at": time.Now(),
 	})
 	if err != nil {
 		log.Printf("Error marshaling messages: %v", err)

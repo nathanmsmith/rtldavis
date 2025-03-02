@@ -21,16 +21,20 @@ package protocol
 
 import (
 	"log"
+	"time"
 
 	"log/slog"
 )
 
 // https://github.com/dekay/im-me/blob/master/pocketwx/src/protocol.txt
 type DecodedPacket struct {
-	WindSpeed     float32
-	WindDirection float64
+	WindSpeed     float32 `json:"wind_speed"`
+	WindDirection float64 `json:"wind_direction"`
 
-	Temperature *float32
+	// When the packet was received
+	ReceivedAt time.Time `json:"received_at"`
+
+	Temperature *float32 `json:"temperature"`
 }
 
 func GetMessageType(m Message) byte {
@@ -38,6 +42,8 @@ func GetMessageType(m Message) byte {
 }
 
 func DecodeMsg(m Message) (packet DecodedPacket) {
+	packet.ReceivedAt = time.Now()
+
 	/* sensor messages arrive with 'channel' numbers, which has no
 	   relation to a go chan or an RF frequency. we only understand the
 	   ISS ('integrated sensor suite') channel 0, used by Vantage Vue. */
