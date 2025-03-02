@@ -33,12 +33,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"io"
 	"log"
-	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -311,9 +309,9 @@ func main() {
 		}
 	}()
 
-	var graphiteChan chan []string
+	var graphiteChan chan protocol.DecodedPacket
 	if *graphiteSrv != "" {
-		graphiteChan = make(chan []string)
+		graphiteChan = make(chan protocol.DecodedPacket)
 		go sendToGraphite(*graphiteSrv, *graphitePrefix, graphiteChan)
 		defer close(graphiteChan)
 	} else {
@@ -517,32 +515,14 @@ func Min(values []int64) (ptr int) {
 	return ptr
 }
 
-func sendToGraphite(server string, prefix string, graphiteChan chan []string) {
-	var conn io.Writer
-	var err error
-	if server == "-" {
-		conn = os.Stdout
-	} else {
-		conn, err = net.Dial("udp", server)
-		if err != nil {
-			log.Printf("failed to open %s: %s", server, err)
-			os.Exit(1)
-			return
-		}
-	}
+func sendToGraphite(server string, prefix string, graphiteChan chan protocol.DecodedPacket) {
 	log.Printf("connected to %s for graphite output", server)
-	for msgs := range graphiteChan {
-		/* note that every call to conn.write generates a udp packet; the
-		   least we can do is bundle the messages that all arrive
-		   together */
-		var b bytes.Buffer
-		for _, line := range msgs {
-			fmt.Fprintf(&b, "%s%s %d\n", prefix, line, time.Now().Unix())
-		}
-		_, err = b.WriteTo(conn)
-		if err != nil {
-			log.Printf("failed to write to %s: %s", server, err)
-			os.Exit(1)
+
+	for packet := range graphiteChan {
+		if packet.Temperature != nil {
+			log.Printf("[%d] temperature = %.1f\n", time.Now().Unix(), *packet.Temperature)
+		} else {
+			log.Printf("Skipping, no temperature in packet")
 		}
 	}
 }
