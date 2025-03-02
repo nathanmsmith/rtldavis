@@ -21,7 +21,7 @@ func DecodeTemperature(m Message) (float32, error) {
 	// He shifts the packet bit into a 12-bit value. Temperature is reported to a tenth
 	// of a degree, so we divide by 10 to get the value in Fahrenheit.
 	//
-	// Examples:
+	// Examples
 	// # 80 00 00 33 8D 00 25 11 (digital temp)
 	// # 81 00 00 59 45 00 A3 E6 (analog temp)
 	// # 81 00 DB FF C3 00 AB F8 (no sensor)

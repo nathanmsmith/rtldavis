@@ -21,14 +21,16 @@ package protocol
 
 import (
 	"log"
+
+	"log/slog"
 )
 
 // https://github.com/dekay/im-me/blob/master/pocketwx/src/protocol.txt
 type DecodedPacket struct {
-	windSpeed     float32
-	windDirection float64
+	WindSpeed     float32
+	WindDirection float64
 
-	temperature *float32
+	Temperature *float32
 }
 
 func GetMessageType(m Message) byte {
@@ -48,12 +50,12 @@ func DecodeMsg(m Message) (packet DecodedPacket) {
 	// obs = append(obs, fmt.Sprintf("windspeed_raw %d", windspeed_raw))
 
 	winddir_vue := float64(m.Data[2])*1.40625 + 0.3
-	packet.windDirection = winddir_vue
+	packet.WindDirection = winddir_vue
 
 	/* apply the error correction table that might not even be for the
 	   Vantage Vue; it's unclear */
 	windspeed := CorrectWindspeed(m.Data[1], m.Data[2])
-	packet.windSpeed = windspeed
+	packet.WindSpeed = windspeed
 
 	msg_type := (m.Data[0] >> 4) & 0x0F
 	/* most of the time we will use the 10-bit number in this weird place */
@@ -100,20 +102,14 @@ func DecodeMsg(m Message) (packet DecodedPacket) {
 
 	// Temperature
 	case 0x08:
-
-		log.Printf("Temperature reading received, raw byte data: %x", m.Data)
-
-		raw = (int16(m.Data[3]) << 4) + (int16(m.Data[4]) >> 4)
-
-		if raw != 0x0FFC {
-			if m.Data[4]&0x08 != 0 {
-				/* digital sensor */
-				temperature := float32(raw) / 10.0
-				packet.temperature = &temperature
-			} else {
-				log.Printf("ERROR: can't interpret analog temperature sensor reading %d", raw)
-			}
+		temperature, err := DecodeTemperature(m)
+		if err == nil {
+			packet.Temperature = &temperature
+			slog.Info("Temperature decoded", "temperature", *packet.Temperature)
+		} else {
+			slog.Error("Could not decode temperature", slog.Any("error", err))
 		}
+
 	case 0x09:
 		/* 10-min average wind gust */
 		// gust_raw := m.Data[3]
@@ -146,7 +142,7 @@ func DecodeMsg(m Message) (packet DecodedPacket) {
 		log.Printf("Unknown data packet type 0x%02x: %02x", m.ID, m.Data)
 	}
 
-	log.Printf("Decoded message, final result: %v", packet)
+	log.Printf("Decoded message, final result: %+v", packet)
 
 	return packet
 }
