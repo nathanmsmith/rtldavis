@@ -59,7 +59,7 @@ func DecodeMsg(m Message) (packet DecodedPacket) {
 
 	msg_type := (m.Data[0] >> 4) & 0x0F
 	/* most of the time we will use the 10-bit number in this weird place */
-	raw := ((int16(m.Data[3]) << 2) + int16(m.Data[4])>>6) & 0x03FF
+	// raw := ((int16(m.Data[3]) << 2) + int16(m.Data[4])>>6) & 0x03FF
 	switch msg_type {
 	case 0x02:
 		/* supercap voltage */
@@ -96,9 +96,9 @@ func DecodeMsg(m Message) (packet DecodedPacket) {
 		// }
 	case 0x07:
 		/* solar panel output */
-		if raw != 0x03FF {
-			// obs = append(obs, fmt.Sprintf("solar_panel_v %.2f", float32(raw)/300.0))
-		}
+		// if raw != 0x03FF {
+		// 	// obs = append(obs, fmt.Sprintf("solar_panel_v %.2f", float32(raw)/300.0))
+		// }
 
 	// Temperature
 	case 0x08:
@@ -118,26 +118,26 @@ func DecodeMsg(m Message) (packet DecodedPacket) {
 		// // obs = append(obs, fmt.Sprintf("gust_index %d", gust_index))
 	case 0x0a:
 		/* humidity */
-		raw = (int16(m.Data[4]>>4) << 8) + int16(m.Data[3])
-		if raw != 0 {
-			if m.Data[4]&0x08 != 0 {
-				/* digital sensor */
-				// obs = append(obs, fmt.Sprintf("humidity %.2f", float32(raw)/10.0))
-			} else {
-				/* TODO: two other types of digital sensor and one analog */
-				log.Printf("can't interpret humidity sensor reading %d", raw)
-				// obs = append(obs, fmt.Sprintf("humidity_raw %d", raw))
-			}
-		}
+		// raw = (int16(m.Data[4]>>4) << 8) + int16(m.Data[3])
+		// if raw != 0 {
+		// 	if m.Data[4]&0x08 != 0 {
+		// 		/* digital sensor */
+		// 		// obs = append(obs, fmt.Sprintf("humidity %.2f", float32(raw)/10.0))
+		// 	} else {
+		// 		/* TODO: two other types of digital sensor and one analog */
+		// 		log.Printf("can't interpret humidity sensor reading %d", raw)
+		// 		// obs = append(obs, fmt.Sprintf("humidity_raw %d", raw))
+		// 	}
+		// }
 	case 0x0e:
-		/* rain */
-		raw = int16(m.Data[3]) /* "rain count raw"?? */
-		/* ignore the high bit because apparently some counters wrap at
-		   128 and others at 256, and it doesn't matter */
-		if raw != 0x80 {
-			raw &= 0x7f
-			// obs = append(obs, fmt.Sprintf("rain_count %d", raw))
-		}
+		// /* rain */
+		// raw = int16(m.Data[3]) /* "rain count raw"?? */
+		// /* ignore the high bit because apparently some counters wrap at
+		//    128 and others at 256, and it doesn't matter */
+		// if raw != 0x80 {
+		// 	raw &= 0x7f
+		// 	// obs = append(obs, fmt.Sprintf("rain_count %d", raw))
+		// }
 	default:
 		log.Printf("Unknown data packet type 0x%02x: %02x", m.ID, m.Data)
 	}
