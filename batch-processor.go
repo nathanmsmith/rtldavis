@@ -103,7 +103,6 @@ func (bp *BatchProcessor) sendBatch() {
 
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("Server returned non-OK status: %d", resp.StatusCode)
-		return
 	}
 
 	// Clear the messages slice after successful send
