@@ -12,7 +12,7 @@ import (
 )
 
 type BatchProcessor struct {
-	packet     []protocol.DecodedPacket
+	packets    []protocol.DecodedPacket
 	mutex      sync.Mutex
 	batchSize  int
 	interval   time.Duration
@@ -23,7 +23,7 @@ type BatchProcessor struct {
 
 func NewBatchProcessor(serverURL string, interval time.Duration, batchSize int) *BatchProcessor {
 	bp := &BatchProcessor{
-		packet:     make([]protocol.DecodedPacket, 0),
+		packets:    make([]protocol.DecodedPacket, 0),
 		batchSize:  batchSize,
 		interval:   interval,
 		serverURL:  serverURL,
@@ -43,10 +43,10 @@ func (bp *BatchProcessor) processMessages() {
 		select {
 		case packet := <-bp.packetChan:
 			bp.mutex.Lock()
-			bp.packet = append(bp.packet, packet)
+			bp.packets = append(bp.packets, packet)
 
 			// If we've reached batch size, send immediately
-			if len(bp.packet) >= bp.batchSize {
+			if len(bp.packets) >= bp.batchSize {
 				bp.sendBatch()
 			}
 			bp.mutex.Unlock()
@@ -65,7 +65,7 @@ func (bp *BatchProcessor) sendBatchPeriodically() {
 		select {
 		case <-ticker.C:
 			bp.mutex.Lock()
-			if len(bp.packet) > 0 {
+			if len(bp.packets) > 0 {
 				bp.sendBatch()
 			}
 			bp.mutex.Unlock()
@@ -76,14 +76,14 @@ func (bp *BatchProcessor) sendBatchPeriodically() {
 }
 
 func (bp *BatchProcessor) sendBatch() {
-	if len(bp.packet) == 0 {
+	if len(bp.packets) == 0 {
 		return
 	}
 
 	// Prepare the payload
 	payload, err := json.Marshal(map[string]interface{}{
-		"packets":         bp.packet,
-		"count":           len(bp.packet),
+		"packets":         bp.packets,
+		"count":           len(bp.packets),
 		"payload_sent_at": time.Now(),
 	})
 	if err != nil {
@@ -107,7 +107,7 @@ func (bp *BatchProcessor) sendBatch() {
 	}
 
 	// Clear the messages slice after successful send
-	bp.packet = make([]protocol.DecodedPacket, 0)
+	bp.packets = make([]protocol.DecodedPacket, 0)
 }
 
 func (bp *BatchProcessor) AddPacket(packet protocol.DecodedPacket) {
@@ -120,7 +120,7 @@ func (bp *BatchProcessor) Stop() {
 	// Send any remaining messages
 	bp.mutex.Lock()
 	defer bp.mutex.Unlock()
-	if len(bp.packet) > 0 {
+	if len(bp.packets) > 0 {
 		bp.sendBatch()
 	}
 }
