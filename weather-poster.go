@@ -11,6 +11,43 @@ import (
 	"github.com/nathanmsmith/rtldavis/protocol"
 )
 
+type WindDatum struct {
+	WindSpeed     float32   `json:"wind_speed"`
+	WindDirection float64   `json:"wind_direction"`
+	ReceivedAt    time.Time `json:"received_at"`
+}
+
+type TemperatureDatum struct {
+	Temperature *float32  `json:"temperature"`
+	ReceivedAt  time.Time `json:"received_at"`
+}
+
+type HumidityDatum struct {
+	Temperature *float32  `json:"temperature"`
+	ReceivedAt  time.Time `json:"received_at"`
+}
+
+// type RainDatum struct {
+// 	Temperature *float32  `json:"temperature"`
+// 	ReceivedAt  time.Time `json:"received_at"`
+// }
+
+type SolarDatum struct {
+	Temperature *float32  `json:"temperature"`
+	ReceivedAt  time.Time `json:"received_at"`
+}
+
+type UVDatum struct {
+	UVIndex    *float32  `json:"uv_index"`
+	ReceivedAt time.Time `json:"received_at"`
+}
+
+type WeatherDatum struct {
+	SentAt time.Time `json:"sent_at"`
+}
+
+// POSTs weather data to a server every N seconds
+// or when all data is collected.
 type WeatherPoster struct {
 	packets    []protocol.DecodedPacket
 	mutex      sync.Mutex
@@ -47,7 +84,7 @@ func (bp *WeatherPoster) processMessages() {
 
 			// If we've reached batch size, send immediately
 			if len(bp.packets) >= bp.batchSize {
-				bp.sendBatch()
+				bp.sendData()
 			}
 			bp.mutex.Unlock()
 
@@ -66,7 +103,7 @@ func (bp *WeatherPoster) sendBatchPeriodically() {
 		case <-ticker.C:
 			bp.mutex.Lock()
 			if len(bp.packets) > 0 {
-				bp.sendBatch()
+				bp.sendData()
 			}
 			bp.mutex.Unlock()
 		case <-bp.done:
@@ -75,7 +112,7 @@ func (bp *WeatherPoster) sendBatchPeriodically() {
 	}
 }
 
-func (bp *WeatherPoster) sendBatch() {
+func (bp *WeatherPoster) sendData() {
 	if len(bp.packets) == 0 {
 		return
 	}
@@ -121,7 +158,7 @@ func (bp *WeatherPoster) Stop() {
 	bp.mutex.Lock()
 	defer bp.mutex.Unlock()
 	if len(bp.packets) > 0 {
-		bp.sendBatch()
+		bp.sendData()
 	}
 }
 
