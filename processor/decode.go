@@ -17,27 +17,29 @@
    2023-12-19 M. Dickerson <pomonamikey@gmail.com>
 */
 
-package protocol
+package processor
 
 import (
 	"log"
 	"time"
 
 	"log/slog"
+
+	"github.com/nathanmsmith/rtldavis/protocol"
 )
 
 // https://github.com/dekay/im-me/blob/master/pocketwx/src/protocol.txt
-type DecodedPacket struct {
-	WindSpeed     float32 `json:"wind_speed"`
-	WindDirection float64 `json:"wind_direction"`
+// type DecodedPacket struct {
+// 	WindSpeed     float32 `json:"wind_speed"`
+// 	WindDirection float64 `json:"wind_direction"`
+//
+// 	// When the packet was received
+// 	ReceivedAt time.Time `json:"received_at"`
+//
+// 	Temperature *float32 `json:"temperature"`
+// }
 
-	// When the packet was received
-	ReceivedAt time.Time `json:"received_at"`
-
-	Temperature *float32 `json:"temperature"`
-}
-
-func GetMessageType(m Message) byte {
+func GetMessageType(m protocol.Message) byte {
 	return (m.Data[0] >> 4) & 0x0F
 }
 

@@ -1,4 +1,4 @@
-package main
+package processor
 
 import (
 	"bytes"
@@ -23,8 +23,8 @@ type TemperatureDatum struct {
 }
 
 type HumidityDatum struct {
-	Temperature *float32  `json:"temperature"`
-	ReceivedAt  time.Time `json:"received_at"`
+	Humidity   *float32  `json:"humidity"`
+	ReceivedAt time.Time `json:"received_at"`
 }
 
 // type RainDatum struct {
@@ -48,24 +48,27 @@ type WeatherDatum struct {
 
 // POSTs weather data to a server every N seconds
 // or when all data is collected.
-type WeatherPoster struct {
-	packets    []protocol.DecodedPacket
-	mutex      sync.Mutex
-	batchSize  int
-	interval   time.Duration
-	serverURL  string
-	packetChan chan protocol.DecodedPacket
-	done       chan struct{}
+type WeatherProcessor struct {
+	// The data
+	temperature *TemperatureDatum
+	wind        *WindDatum
+	humidity    *HumidityDatum
+
+	mutex       sync.Mutex
+	batchSize   int
+	interval    time.Duration
+	serverURL   string
+	messageChan chan protocol.Message
+	done        chan struct{}
 }
 
-func NewBatchProcessor(serverURL string, interval time.Duration, batchSize int) *WeatherPoster {
-	bp := &WeatherPoster{
-		packets:    make([]protocol.DecodedPacket, 0),
-		batchSize:  batchSize,
-		interval:   interval,
-		serverURL:  serverURL,
-		packetChan: make(chan protocol.DecodedPacket, batchSize),
-		done:       make(chan struct{}),
+func NewBatchProcessor(serverURL string, interval time.Duration, batchSize int) *WeatherProcessor {
+	bp := &WeatherProcessor{
+		batchSize:   batchSize,
+		interval:    interval,
+		serverURL:   serverURL,
+		messageChan: make(chan protocol.Message, batchSize),
+		done:        make(chan struct{}),
 	}
 
 	// Start the background processing
@@ -75,15 +78,31 @@ func NewBatchProcessor(serverURL string, interval time.Duration, batchSize int) 
 	return bp
 }
 
-func (bp *WeatherPoster) processMessages() {
+func (wp *WeatherProcessor) hasSomeDataFields() bool {
+	return wp.temperature != nil
+}
+
+func (wp *WeatherProcessor) hasAllDataFields() bool {
+	return wp.temperature != nil
+}
+
+func (bp *WeatherProcessor) processMessages() {
 	for {
 		select {
-		case packet := <-bp.packetChan:
+		case message := <-bp.messageChan:
 			bp.mutex.Lock()
-			bp.packets = append(bp.packets, packet)
 
-			// If we've reached batch size, send immediately
-			if len(bp.packets) >= bp.batchSize {
+			// process wind speed, wind direction
+			// set wind speed, wind direction
+
+			// get message type
+			// switch
+			// if UV, set UV
+			// if temperature, set temperature
+			// if humidity, set humidity
+			// etc
+
+			if bp.hasAllDataFields() {
 				bp.sendData()
 			}
 			bp.mutex.Unlock()
@@ -94,7 +113,7 @@ func (bp *WeatherPoster) processMessages() {
 	}
 }
 
-func (bp *WeatherPoster) sendBatchPeriodically() {
+func (bp *WeatherProcessor) sendBatchPeriodically() {
 	ticker := time.NewTicker(bp.interval)
 	defer ticker.Stop()
 
@@ -102,7 +121,7 @@ func (bp *WeatherPoster) sendBatchPeriodically() {
 		select {
 		case <-ticker.C:
 			bp.mutex.Lock()
-			if len(bp.packets) > 0 {
+			if bp.hasSomeDataFields() {
 				bp.sendData()
 			}
 			bp.mutex.Unlock()
@@ -112,15 +131,16 @@ func (bp *WeatherPoster) sendBatchPeriodically() {
 	}
 }
 
-func (bp *WeatherPoster) sendData() {
-	if len(bp.packets) == 0 {
+func (bp *WeatherProcessor) sendData() {
+	if !bp.hasNoDataFields() {
 		return
 	}
 
 	// Prepare the payload
+
 	payload, err := json.Marshal(map[string]interface{}{
-		"packets":         bp.packets,
-		"count":           len(bp.packets),
+		"packets":         bp.messages,
+		"count":           len(bp.messages),
 		"payload_sent_at": time.Now(),
 	})
 	if err != nil {
@@ -144,20 +164,20 @@ func (bp *WeatherPoster) sendData() {
 	}
 
 	// Clear the messages slice after successful send
-	bp.packets = make([]protocol.DecodedPacket, 0)
+	// TODO: bp.clearData()
 }
 
-func (bp *WeatherPoster) AddPacket(packet protocol.DecodedPacket) {
-	bp.packetChan <- packet
+func (wp *WeatherProcessor) AddMessage(message protocol.Message) {
+	wp.messageChan <- message
 }
 
-func (bp *WeatherPoster) Stop() {
+func (bp *WeatherProcessor) Stop() {
 	close(bp.done)
 
 	// Send any remaining messages
 	bp.mutex.Lock()
 	defer bp.mutex.Unlock()
-	if len(bp.packets) > 0 {
+	if bp.hasSomeDataFields() {
 		bp.sendData()
 	}
 }
