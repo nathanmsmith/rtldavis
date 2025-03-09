@@ -11,7 +11,7 @@ import (
 	"github.com/nathanmsmith/rtldavis/protocol"
 )
 
-type BatchProcessor struct {
+type WeatherPoster struct {
 	packets    []protocol.DecodedPacket
 	mutex      sync.Mutex
 	batchSize  int
@@ -21,8 +21,8 @@ type BatchProcessor struct {
 	done       chan struct{}
 }
 
-func NewBatchProcessor(serverURL string, interval time.Duration, batchSize int) *BatchProcessor {
-	bp := &BatchProcessor{
+func NewBatchProcessor(serverURL string, interval time.Duration, batchSize int) *WeatherPoster {
+	bp := &WeatherPoster{
 		packets:    make([]protocol.DecodedPacket, 0),
 		batchSize:  batchSize,
 		interval:   interval,
@@ -38,7 +38,7 @@ func NewBatchProcessor(serverURL string, interval time.Duration, batchSize int) 
 	return bp
 }
 
-func (bp *BatchProcessor) processMessages() {
+func (bp *WeatherPoster) processMessages() {
 	for {
 		select {
 		case packet := <-bp.packetChan:
@@ -57,7 +57,7 @@ func (bp *BatchProcessor) processMessages() {
 	}
 }
 
-func (bp *BatchProcessor) sendBatchPeriodically() {
+func (bp *WeatherPoster) sendBatchPeriodically() {
 	ticker := time.NewTicker(bp.interval)
 	defer ticker.Stop()
 
@@ -75,7 +75,7 @@ func (bp *BatchProcessor) sendBatchPeriodically() {
 	}
 }
 
-func (bp *BatchProcessor) sendBatch() {
+func (bp *WeatherPoster) sendBatch() {
 	if len(bp.packets) == 0 {
 		return
 	}
@@ -110,11 +110,11 @@ func (bp *BatchProcessor) sendBatch() {
 	bp.packets = make([]protocol.DecodedPacket, 0)
 }
 
-func (bp *BatchProcessor) AddPacket(packet protocol.DecodedPacket) {
+func (bp *WeatherPoster) AddPacket(packet protocol.DecodedPacket) {
 	bp.packetChan <- packet
 }
 
-func (bp *BatchProcessor) Stop() {
+func (bp *WeatherPoster) Stop() {
 	close(bp.done)
 
 	// Send any remaining messages
