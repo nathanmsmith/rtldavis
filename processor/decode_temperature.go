@@ -1,13 +1,16 @@
-package protocol
+package processor
 
 import (
 	"errors"
-	"log"
+
+	"log/slog"
+
+	"github.com/nathanmsmith/rtldavis/protocol"
 )
 
 // Decode the temperature reading from a message.
 // Returns an error if there is no temperature reading.
-func DecodeTemperature(m Message) (float32, error) {
+func DecodeTemperature(m protocol.Message) (float32, error) {
 	// From https://github.com/dekay/im-me/blob/master/pocketwx/src/protocol.txt:
 	// > Byte 3 and 4 are temperature.  The first byte is MSB and the second LSB.  The
 	// > value is signed with 0x0000 representing 0F.  This reading in the old version
@@ -26,7 +29,7 @@ func DecodeTemperature(m Message) (float32, error) {
 	// # 81 00 00 59 45 00 A3 E6 (analog temp)
 	// # 81 00 DB FF C3 00 AB F8 (no sensor)
 
-	log.Printf("Temperature reading received, raw byte data: %x", m.Data)
+	slog.Info("Temperature reading received", "raw_byte_data", bytesToSpacedHex(m.Data))
 	if GetMessageType(m) != 0x08 {
 		return -1, errors.New("Message does not have temperature")
 	}

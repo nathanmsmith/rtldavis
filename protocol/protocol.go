@@ -38,6 +38,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"time"
 
 	"github.com/nathanmsmith/rtldavis/crc"
 	"github.com/nathanmsmith/rtldavis/dsp"
@@ -269,6 +270,7 @@ type Message struct {
 	dsp.Packet
 	ID         byte
 	BatteryLow bool
+	ReceivedAt time.Time
 }
 
 func NewMessage(pkt dsp.Packet) (m Message) {
@@ -277,6 +279,7 @@ func NewMessage(pkt dsp.Packet) (m Message) {
 	copy(m.Data, pkt.Data[2:])
 	m.ID = m.Data[0] & 0x7
 	m.BatteryLow = ((m.Data[0]>>3)&0x01 == 1)
+	m.ReceivedAt = time.Now()
 	return m
 }
 

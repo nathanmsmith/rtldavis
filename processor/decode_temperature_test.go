@@ -1,14 +1,15 @@
-package protocol
+package processor
 
 import (
 	"testing"
 
 	"github.com/nathanmsmith/rtldavis/dsp"
+	"github.com/nathanmsmith/rtldavis/protocol"
 	"github.com/stretchr/testify/assert"
 )
 
-func createMessage(data []byte) Message {
-	return Message{
+func createMessage(data []byte) protocol.Message {
+	return protocol.Message{
 		Packet: dsp.Packet{
 			Idx:  0,
 			Data: data,

@@ -43,6 +43,7 @@ import (
 	"time"
 
 	rtlsdr "github.com/jpoirier/gortlsdr"
+	"github.com/nathanmsmith/rtldavis/processor"
 	"github.com/nathanmsmith/rtldavis/protocol"
 )
 
@@ -309,7 +310,7 @@ func main() {
 		}
 	}()
 
-	processor := NewBatchProcessor(
+	processor := processor.NewWeatherProcessor(
 		*serverSrv,
 		5*time.Second, // Send every 5 seconds
 		100,           // or when batch size reaches 100
@@ -455,7 +456,7 @@ func main() {
 							log.Printf("%02X %d %d %d %d %d msg.ID=%d undefined:%d",
 								msg.Data, chTotMsgs[0], chTotMsgs[1], chTotMsgs[2], chTotMsgs[3], totInit, msg.ID, idUndefs)
 						} else if serverSrv != nil {
-							processor.AddPacket(protocol.DecodeMsg(msg))
+							processor.AddMessage(msg)
 						} else {
 							log.Printf("%02X %d %d %d %d %d msg.ID=%d",
 								msg.Data, chTotMsgs[0], chTotMsgs[1], chTotMsgs[2], chTotMsgs[3], totInit, msg.ID)
