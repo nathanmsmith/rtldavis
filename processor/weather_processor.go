@@ -3,10 +3,11 @@ package processor
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
 	"sync"
 	"time"
+
+	"log/slog"
 
 	"github.com/nathanmsmith/rtldavis/protocol"
 )
@@ -18,7 +19,7 @@ type WindDatum struct {
 }
 
 type TemperatureDatum struct {
-	Temperature *float32  `json:"temperature"`
+	Temperature float32   `json:"temperature"`
 	ReceivedAt  time.Time `json:"received_at"`
 }
 
@@ -33,26 +34,28 @@ type HumidityDatum struct {
 // }
 
 type SolarDatum struct {
-	Temperature *float32  `json:"temperature"`
-	ReceivedAt  time.Time `json:"received_at"`
+	// Temperature *float32  `json:"temperature"`
+	ReceivedAt time.Time `json:"received_at"`
 }
 
 type UVDatum struct {
-	UVIndex    *float32  `json:"uv_index"`
+	// UVIndex    *float32  `json:"uv_index"`
 	ReceivedAt time.Time `json:"received_at"`
 }
 
 type WeatherDatum struct {
-	SentAt time.Time `json:"sent_at"`
+	Temperature *TemperatureDatum `json:"temperature"`
+	SentAt      time.Time         `json:"sent_at"`
 }
 
 // POSTs weather data to a server every N seconds
 // or when all data is collected.
 type WeatherProcessor struct {
 	// The data
-	temperature *TemperatureDatum
-	wind        *WindDatum
-	humidity    *HumidityDatum
+	data WeatherDatum
+	// temperature *TemperatureDatum
+	// wind        *WindDatum
+	// humidity    *HumidityDatum
 
 	mutex       sync.Mutex
 	batchSize   int
@@ -62,7 +65,7 @@ type WeatherProcessor struct {
 	done        chan struct{}
 }
 
-func NewBatchProcessor(serverURL string, interval time.Duration, batchSize int) *WeatherProcessor {
+func NewWeatherProcessor(serverURL string, interval time.Duration, batchSize int) *WeatherProcessor {
 	bp := &WeatherProcessor{
 		batchSize:   batchSize,
 		interval:    interval,
@@ -73,47 +76,59 @@ func NewBatchProcessor(serverURL string, interval time.Duration, batchSize int) 
 
 	// Start the background processing
 	go bp.processMessages()
-	go bp.sendBatchPeriodically()
+	go bp.sendDataPeriodically()
 
 	return bp
 }
 
 func (wp *WeatherProcessor) hasSomeDataFields() bool {
-	return wp.temperature != nil
+	return wp.data.Temperature != nil
 }
 
-func (wp *WeatherProcessor) hasAllDataFields() bool {
-	return wp.temperature != nil
-}
+// func (wp *WeatherProcessor) hasAllDataFields() bool {
+// 	return wp.data.Temperature != nil
+// }
 
-func (bp *WeatherProcessor) processMessages() {
+func (wp *WeatherProcessor) processMessages() {
 	for {
 		select {
-		case message := <-bp.messageChan:
-			bp.mutex.Lock()
+		case message := <-wp.messageChan:
+			wp.mutex.Lock()
 
 			// process wind speed, wind direction
 			// set wind speed, wind direction
 
+			switch GetMessageType(message) {
+
+			// Temperature
+			case 0x08:
+				temperature, err := DecodeTemperature(message)
+				if err == nil {
+					wp.data.Temperature = &TemperatureDatum{
+						Temperature: temperature,
+						ReceivedAt:  message.ReceivedAt,
+					}
+					slog.Info("Saved temperature data, will send soon", "temp", temperature)
+				} else {
+					slog.Error("Could not decode temperature from packet", "error", err)
+				}
+			}
+
 			// get message type
 			// switch
 			// if UV, set UV
-			// if temperature, set temperature
 			// if humidity, set humidity
 			// etc
 
-			if bp.hasAllDataFields() {
-				bp.sendData()
-			}
-			bp.mutex.Unlock()
+			wp.mutex.Unlock()
 
-		case <-bp.done:
+		case <-wp.done:
 			return
 		}
 	}
 }
 
-func (bp *WeatherProcessor) sendBatchPeriodically() {
+func (bp *WeatherProcessor) sendDataPeriodically() {
 	ticker := time.NewTicker(bp.interval)
 	defer ticker.Stop()
 
@@ -131,40 +146,39 @@ func (bp *WeatherProcessor) sendBatchPeriodically() {
 	}
 }
 
-func (bp *WeatherProcessor) sendData() {
-	if !bp.hasNoDataFields() {
+func (wp *WeatherProcessor) sendData() {
+	if !wp.hasSomeDataFields() {
 		return
 	}
 
-	// Prepare the payload
-
-	payload, err := json.Marshal(map[string]interface{}{
-		"packets":         bp.messages,
-		"count":           len(bp.messages),
-		"payload_sent_at": time.Now(),
-	})
+	wp.data.SentAt = time.Now()
+	payload, err := json.Marshal(wp.data)
 	if err != nil {
-		log.Printf("Error marshaling messages: %v", err)
+		slog.Error("Error marshaling data to JSON", "error", err)
 		return
 	}
 
 	// Send the HTTP POST request
-	resp, err := http.Post(bp.serverURL, "application/json", bytes.NewBuffer(payload))
+	resp, err := http.Post(wp.serverURL, "application/json", bytes.NewBuffer(payload))
 	if err != nil {
-		log.Printf("Error sending batch: %v", err)
+		slog.Error("Error POSTing data", "error", err, "payload", payload)
 		return
 	}
 	defer resp.Body.Close()
 
-	log.Printf("Successfully sent messages: %s", payload)
+	slog.Info("Successfully POSTed weather data", "payload", payload)
 
 	if resp.StatusCode != http.StatusOK {
-		log.Printf("Server returned non-OK status: %d", resp.StatusCode)
+		slog.Error("Server returned non-OK status", "status", resp.Status)
 		return
 	}
 
-	// Clear the messages slice after successful send
-	// TODO: bp.clearData()
+	wp.clearData()
+}
+
+// Clear out any existing weather data.
+func (wp *WeatherProcessor) clearData() {
+	wp.data = WeatherDatum{}
 }
 
 func (wp *WeatherProcessor) AddMessage(message protocol.Message) {
