@@ -8,6 +8,7 @@ import (
 )
 
 // Decode the windspeed reading from a message.
+// TODO: write tests when you're a little more sure about the accuracy of the measurements
 func DecodeWindDirection(m protocol.Message) int16 {
 	// From Dekay (https://github.com/dekay/im-me/blob/master/pocketwx/src/protocol.txt):
 	// > Byte 2: Wind direction from 1 to 360 degrees.  Wind direction is updated every

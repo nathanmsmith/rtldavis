@@ -5,6 +5,7 @@ import (
 )
 
 // Decode the windspeed reading from a message.
+// TODO: write tests when you're a little more sure about the accuracy of the measurements
 func DecodeWindSpeed(m protocol.Message) int16 {
 	// From Dekay (https://github.com/dekay/im-me/blob/master/pocketwx/src/protocol.txt):
 	// > Byte 1: Wind speed in mph.  Wind speed is updated every transmission.  Simple.
