@@ -13,8 +13,8 @@ import (
 )
 
 type WindDatum struct {
-	Speed      int       `json:"speed"`
-	Direction  int       `json:"direction"`
+	Speed      int16     `json:"speed"`
+	Direction  int16     `json:"direction"`
 	ReceivedAt time.Time `json:"received_at"`
 }
 
