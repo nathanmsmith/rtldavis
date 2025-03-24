@@ -108,10 +108,7 @@ func (wp *WeatherProcessor) processMessages() {
 				Direction:  windDirection,
 				ReceivedAt: message.ReceivedAt,
 			}
-			slog.Info("Saved wind data, will send soon", "windspeed", windSpeed, "raw_windspeed", int(message.Data[1]))
-
-			// winddir_vue := float64(m.Data[2])*1.40625 + 0.3
-			// packet.WindDirection = winddir_vue
+			slog.Info("Saved wind data, will send soon", "windspeed", windSpeed, "direction", windDirection)
 
 			switch GetMessageType(message) {
 
@@ -129,10 +126,10 @@ func (wp *WeatherProcessor) processMessages() {
 				}
 			}
 
-			// get message type
-			// switch
+			// TODO: other measurements
 			// if UV, set UV
 			// if humidity, set humidity
+			// rain rate
 			// etc
 
 			wp.mutex.Unlock()
