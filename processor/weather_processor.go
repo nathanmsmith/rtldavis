@@ -13,9 +13,9 @@ import (
 )
 
 type WindDatum struct {
-	WindSpeed     float32   `json:"wind_speed"`
-	WindDirection float64   `json:"wind_direction"`
-	ReceivedAt    time.Time `json:"received_at"`
+	Speed      int       `json:"speed"`
+	Direction  int       `json:"direction"`
+	ReceivedAt time.Time `json:"received_at"`
 }
 
 type TemperatureDatum struct {
@@ -45,6 +45,7 @@ type UVDatum struct {
 
 type WeatherDatum struct {
 	Temperature *TemperatureDatum `json:"temperature"`
+	Wind        *WindDatum        `json:"wind"`
 	SentAt      time.Time         `json:"sent_at"`
 }
 
@@ -95,8 +96,22 @@ func (wp *WeatherProcessor) processMessages() {
 		case message := <-wp.messageChan:
 			wp.mutex.Lock()
 
+			slog.Info("Processing message", "raw_message", bytesToSpacedHex(message.Data))
+
 			// process wind speed, wind direction
 			// set wind speed, wind direction
+
+			windSpeed := DecodeWindSpeed(message)
+			windDirection := DecodeWindDirection(message)
+			wp.data.Wind = &WindDatum{
+				Speed:      windSpeed,
+				Direction:  windDirection,
+				ReceivedAt: message.ReceivedAt,
+			}
+			slog.Info("Saved wind data, will send soon", "windspeed", windSpeed, "raw_windspeed", int(message.Data[1]))
+
+			// winddir_vue := float64(m.Data[2])*1.40625 + 0.3
+			// packet.WindDirection = winddir_vue
 
 			switch GetMessageType(message) {
 
