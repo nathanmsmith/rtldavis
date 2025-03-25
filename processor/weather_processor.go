@@ -112,6 +112,10 @@ func (wp *WeatherProcessor) processMessages() {
 
 			switch GetMessageType(message) {
 
+			// Rain Rate
+			case 0x05:
+				DecodeRainRate(message)
+
 			// Temperature
 			case 0x08:
 				temperature, err := DecodeTemperature(message)
