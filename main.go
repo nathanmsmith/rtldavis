@@ -42,6 +42,8 @@ import (
 	"syscall"
 	"time"
 
+	"log/slog"
+
 	rtlsdr "github.com/jpoirier/gortlsdr"
 	"github.com/nathanmsmith/rtldavis/processor"
 	"github.com/nathanmsmith/rtldavis/protocol"
@@ -204,8 +206,10 @@ func main() {
 
 	dev, err := rtlsdr.Open(0)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("Could not find antenna, is it plugged in?")
+		os.Exit(1)
 	}
+	slog.Info("Found antenna")
 
 	hop := p.SetHop(0, 0) // start program with first hop frequency
 	log.Printf("Hop: %s", hop)

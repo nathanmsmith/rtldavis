@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"log"
 	"math"
+
+	"log/slog"
 )
 
 type ByteToCmplxLUT [256]float64
@@ -214,6 +216,7 @@ func NewPacketConfig(bitRate, symbolLength, preambleSymbols, packetSymbols int, 
 }
 
 func (cfg PacketConfig) Log() {
+	slog.Info("Configured a new packet parser")
 	log.Println("BitRate:", cfg.BitRate)
 	log.Println("SymbolLength:", cfg.SymbolLength)
 	log.Println("SampleRate:", cfg.SampleRate)
