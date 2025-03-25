@@ -222,7 +222,7 @@ func main() {
 	}
 
 	// set SetTunerGainMode
-	ManualGainMode := !(gain == 0)
+	ManualGainMode := gain != 0
 
 	if err := dev.SetTunerGainMode(ManualGainMode); err != nil {
 		log.Fatal(err)
