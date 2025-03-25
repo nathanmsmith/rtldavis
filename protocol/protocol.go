@@ -234,7 +234,7 @@ func (p *Parser) Parse(pkts []dsp.Packet) (msgs []Message) {
 		// Have to stride this at the same as symbol length
 		lower := pkt.Idx + 0*p.Cfg.SymbolLength
 		upper := pkt.Idx + 16*p.Cfg.SymbolLength
-		tail := p.Demodulator.Discriminated[lower:upper]
+		tail := p.Discriminated[lower:upper]
 		stride := lower % p.Cfg.SymbolLength
 		count := 0
 		var mean float64
