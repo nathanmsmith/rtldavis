@@ -7,4 +7,6 @@ linters:
       check-blank: false
       exclude-functions:
         - (*github.com/jpoirier/gortlsdr.Context).CancelAsync
+        - (*github.com/jpoirier/gortlsdr.Context).Close
         - (*io.PipeWriter).Close
+        - (*io.PipeReader).Close

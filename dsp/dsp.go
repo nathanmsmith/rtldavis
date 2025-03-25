@@ -34,7 +34,7 @@ func NewByteToCmplxLUT() (lut ByteToCmplxLUT) {
 
 func (l *ByteToCmplxLUT) Execute(in []byte, out []complex128) {
 	if len(in) != len(out)<<1 {
-		panic(fmt.Errorf("Incompatible slice lengths: %d, %d", len(in), len(out)))
+		panic(fmt.Errorf("incompatible slice lengths: %d, %d", len(in), len(out)))
 	}
 
 	for idx := range out {
