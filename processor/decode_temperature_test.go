@@ -22,7 +22,7 @@ func TestDecodeTemperatureInvalidMessage(t *testing.T) {
 	message := createMessage([]byte{0xA0, 0x00, 0x00, 0xC9, 0x3D, 0x00, 0x2A, 0x87})
 
 	temp, err := DecodeTemperature(message)
-	assert.ErrorContains(t, err, "Message does not have temperature")
+	assert.ErrorContains(t, err, "message does not have temperature")
 	assert.Equal(t, float32(-1.0), temp)
 }
 
@@ -30,7 +30,7 @@ func TestDecodeTemperatureAnalogSensor(t *testing.T) {
 	message := createMessage([]byte{0x81, 0x00, 0x00, 0x59, 0x45, 0x00, 0xA3, 0xE6})
 
 	temp, err := DecodeTemperature(message)
-	assert.ErrorContains(t, err, "Temperature reading is not from digital sensor. Analog sensor not supported")
+	assert.ErrorContains(t, err, "temperature reading is not from digital sensor. Analog sensor not supported")
 	assert.Equal(t, float32(-1.0), temp)
 }
 
@@ -38,7 +38,7 @@ func TestDecodeTemperatureNoSensor(t *testing.T) {
 	message := createMessage([]byte{0x81, 0x00, 0xDB, 0xFF, 0xC8, 0x00, 0xAB, 0xF8})
 
 	temp, err := DecodeTemperature(message)
-	assert.ErrorContains(t, err, "No sensor")
+	assert.ErrorContains(t, err, "no sensor")
 	assert.Equal(t, float32(-1.0), temp)
 }
 
