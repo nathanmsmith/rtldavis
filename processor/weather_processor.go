@@ -176,7 +176,11 @@ func (wp *WeatherProcessor) sendData() {
 		slog.Error("Error POSTing data", "error", err, "payload", payload)
 		return
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if closeErr := resp.Body.Close(); closeErr != nil {
+			slog.Error("Error closing response body", "error", closeErr)
+		}
+	}()
 
 	slog.Info("Successfully POSTed weather data", "payload", payload)
 

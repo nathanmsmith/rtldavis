@@ -31,16 +31,16 @@ func DecodeTemperature(m protocol.Message) (float32, error) {
 
 	slog.Info("Temperature reading received", "raw_byte_data", bytesToSpacedHex(m.Data))
 	if GetMessageType(m) != 0x08 {
-		return -1, errors.New("Message does not have temperature")
+		return -1, errors.New("message does not have temperature")
 	}
 
 	if m.Data[4]&0x08 == 0 {
-		return -1, errors.New("Temperature reading is not from digital sensor. Analog sensor not supported")
+		return -1, errors.New("temperature reading is not from digital sensor. Analog sensor not supported")
 	}
 
 	raw := (int16(m.Data[3]) << 4) + (int16(m.Data[4]) >> 4)
 	if raw == 0x0FFC {
-		return -1, errors.New("No sensor")
+		return -1, errors.New("no sensor")
 	}
 
 	temperature := float32(raw) / 10.0

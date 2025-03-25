@@ -22,9 +22,9 @@ jobs:
       run: sudo apt install -y  librtlsdr-dev
 
     - name: golangci-lint
-      uses: golangci/golangci-lint-action@v6
+      uses: golangci/golangci-lint-action@v7
       with:
-        version: v1.64
+        version: v2.0.1
 
   test:
     name: Run Go Tests
