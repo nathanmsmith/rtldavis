@@ -8,6 +8,7 @@ import (
 	"github.com/nathanmsmith/rtldavis/protocol"
 )
 
+// Return the rate of rain, as inches/hour.
 func DecodeRainRate(m protocol.Message) (float32, error) {
 	// From Dekay (https://github.com/dekay/DavisRFM69/wiki/Message-Protocol):
 	// > Bytes 3 and 4 contain the rain rate information. The rate is actually the time in seconds between rain bucket tips in the ISS.
@@ -26,7 +27,7 @@ func DecodeRainRate(m protocol.Message) (float32, error) {
 	//     else:
 	//       print("rainrate fail")
 
-	// > Rain is in Byte 3.  It is a running total of bucket tips that wraps back
+	//    > Rain is in Byte 3.  It is a running total of bucket tips that wraps back
 	// > around to 0 eventually from the ISS.  It is up to the console to keep track of
 	// > changes in this byte.  The example below is bound to confuse: the leading
 	// > value is the elapsed time since data collection started (in seconds), all
@@ -49,25 +50,33 @@ func DecodeRainRate(m protocol.Message) (float32, error) {
 	// https://github.com/dcbo/ISS-MQTT-Gateway
 	// https://github.com/dcbo/ISS-MQTT-Gateway/blob/1ea7bab1e7c05f49519e7f18509698e05dc9ef04/src/main.cpp#L650
 
+	// https://www.carluccio.de/davis-vue-hacking-part-2/
+	// https://github.com/dcbo/ISS-MQTT-Gateway/blob/1ea7bab1e7c05f49519e7f18509698e05dc9ef04/src/main.cpp#L659C1-L667C1
+
 	slog.Info("Rain rate reading received", "raw_byte_data", bytesToSpacedHex(m.Data))
 	if GetMessageType(m) != 0x05 {
-		return -1, errors.New("Message does not have rain rate")
+		return -1, errors.New("message does not have rain rate")
 	}
 
 	if m.Data[3] == 0xFF {
 		slog.Info("No rain detected")
-
-		// If the Most Significant Nibble of byte 4 is < 4 (i.e., 0100)
-		// Light rain
-	} else if m.Data[4]&0x40 == 0 {
-		slog.Info("Light rain detected")
-		// If the Most Significant Nibble of byte 4 is >= 4 (i.e., 0100)
-		// Heavy rain
-	} else if m.Data[4]&0x40 == 0x40 {
-		slog.Info("Heavy rain detected")
-	} else {
-		// error
+		return 0, nil
 	}
 
-	return 0, nil
+	var clicksPerHour float32
+	rawRainRate := ((m.Data[4] & 0x30) << 4) + m.Data[3]
+
+	if m.Data[4]&0x40 == 0 {
+		clicksPerHour = 576000 / float32(rawRainRate)
+		slog.Info("Heavy rain detected", "clicksPerHour", clicksPerHour)
+	} else {
+		clicksPerHour = 3600 / float32(rawRainRate)
+		slog.Info("Light rain detected", "clicksPerHour", clicksPerHour)
+	}
+
+	// In Europe, Davis sells a 0.2mm tipping spoon instead of the
+	// 0.01in tipping spoon.
+	// TODO: enabled this as a toggle
+	inchesPerHour := clicksPerHour * 0.01
+	return inchesPerHour, nil
 }

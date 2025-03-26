@@ -24,14 +24,14 @@ type TemperatureDatum struct {
 }
 
 type HumidityDatum struct {
-	Humidity   *float32  `json:"humidity"`
+	Humidity   float32   `json:"humidity"`
 	ReceivedAt time.Time `json:"received_at"`
 }
 
-// type RainDatum struct {
-// 	Temperature *float32  `json:"temperature"`
-// 	ReceivedAt  time.Time `json:"received_at"`
-// }
+type RainDatum struct {
+	InchesPerHour float32   `json:"inches_per_hour"`
+	ReceivedAt    time.Time `json:"received_at"`
+}
 
 type SolarDatum struct {
 	// Temperature *float32  `json:"temperature"`
@@ -46,6 +46,7 @@ type UVDatum struct {
 type WeatherDatum struct {
 	Temperature *TemperatureDatum `json:"temperature"`
 	Wind        *WindDatum        `json:"wind"`
+	Rain        *RainDatum        `json:"rain"`
 	SentAt      time.Time         `json:"sent_at"`
 }
 
@@ -114,7 +115,16 @@ func (wp *WeatherProcessor) processMessages() {
 
 			// Rain Rate
 			case 0x05:
-				DecodeRainRate(message)
+				inchesPerHour, err := DecodeRainRate(message)
+				if err == nil {
+					wp.data.Rain = &RainDatum{
+						InchesPerHour: inchesPerHour,
+						ReceivedAt:    message.ReceivedAt,
+					}
+					slog.Info("Saved rain rate data, will send soon", "inchesPerHour", inchesPerHour)
+				} else {
+					slog.Error("Could not decode temperature from packet", "error", err)
+				}
 
 			// Temperature
 			case 0x08:
