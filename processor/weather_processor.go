@@ -125,6 +125,9 @@ func (wp *WeatherProcessor) processMessages() {
 				} else {
 					slog.Error("Could not decode temperature from packet", "error", err)
 				}
+			// Rain clicks
+			case 0x0E:
+				DecodeRainfall(message)
 
 			// Temperature
 			case 0x08:
