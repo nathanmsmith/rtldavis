@@ -24,14 +24,14 @@ type TemperatureDatum struct {
 }
 
 type HumidityDatum struct {
-	Humidity   *float32  `json:"humidity"`
+	Humidity   float32   `json:"humidity"`
 	ReceivedAt time.Time `json:"received_at"`
 }
 
-// type RainDatum struct {
-// 	Temperature *float32  `json:"temperature"`
-// 	ReceivedAt  time.Time `json:"received_at"`
-// }
+type RainDatum struct {
+	InchesPerHour float32   `json:"inches_per_hour"`
+	ReceivedAt    time.Time `json:"received_at"`
+}
 
 type SolarDatum struct {
 	// Temperature *float32  `json:"temperature"`
@@ -46,6 +46,7 @@ type UVDatum struct {
 type WeatherDatum struct {
 	Temperature *TemperatureDatum `json:"temperature"`
 	Wind        *WindDatum        `json:"wind"`
+	Rain        *RainDatum        `json:"rain"`
 	SentAt      time.Time         `json:"sent_at"`
 }
 
@@ -112,6 +113,60 @@ func (wp *WeatherProcessor) processMessages() {
 
 			switch GetMessageType(message) {
 
+			// TODO: voltage of goldcap Msg-ID
+			case 0x02:
+
+			// UV Index
+			// https://github.com/dekay/DavisRFM69/wiki/Message-Protocol#message-4-uv-index
+			case 0x04:
+
+			// Rain Rate
+			case 0x05:
+				inchesPerHour, err := DecodeRainRate(message)
+				if err == nil {
+					wp.data.Rain = &RainDatum{
+						InchesPerHour: inchesPerHour,
+						ReceivedAt:    message.ReceivedAt,
+					}
+					slog.Info("Saved rain rate data, will send soon", "inchesPerHour", inchesPerHour)
+				} else {
+					slog.Error("Could not decode temperature from packet", "error", err)
+				}
+
+			// todo: Solar radiation?
+			// https://github.com/dekay/DavisRFM69/wiki/Message-Protocol#message-6-solar-radiation
+			// Dario says it's 0x07, Dekay 0x06
+			// https://www.carluccio.de/davis-vue-hacking-part-2/
+			case 0x06, 0x07:
+				//    elif message_type == 6:
+				//     # solar radiation
+				//     # message examples
+				//     # 61 00 DB 00 43 00 F4 3B
+				//     # 60 00 00 FF C5 00 79 DA (no sensor)
+				//     sr_raw = ((pkt[3] << 2) + (pkt[4] >> 6)) & 0x3FF
+				//     if sr_raw < 0x3FE:
+				//         data['solar_radiation'] = sr_raw * 1.757936
+				//         dbg_parse(2, "solar_radiation_raw=0x%04x value=%s"
+				//                   % (sr_raw, data['solar_radiation']))
+				// elif message_type == 7:
+				//     # solar cell output / solar power (Vue only)
+				//     # message example:
+				//     # 70 01 F5 CE 43 86 58 E2
+				//     """When the raw values are divided by 300 the voltage comes
+				//     in the range of 2.8-3.3 V measured by the machine readable
+				//     format
+				//     """
+				//     solar_power_raw = ((pkt[3] << 2) + (pkt[4] >> 6)) & 0x3FF
+				//     if solar_power_raw != 0x3FF:
+				//         data['solar_power'] = solar_power_raw / 300.0
+				//         dbg_parse(2, "solar_power_raw=0x%03x solar_power=%s"
+				//                   % (solar_power_raw, data['solar_power']))
+				//
+
+			// Rain clicks
+			case 0x0E:
+				DecodeRainfall(message)
+
 			// Temperature
 			case 0x08:
 				temperature, err := DecodeTemperature(message)
@@ -124,13 +179,16 @@ func (wp *WeatherProcessor) processMessages() {
 				} else {
 					slog.Error("Could not decode temperature from packet", "error", err)
 				}
+
+			// gust speed Msg-ID 0x9 (every 50 seconds):
+
+			// outside humidity Msg-ID 0xA (every 50 seconds):
+
+			default:
+				slog.Info("Unknown message type", "raw_message", bytesToSpacedHex(message.Data), "message_type", GetMessageType(message))
 			}
 
-			// TODO: other measurements
-			// if UV, set UV
-			// if humidity, set humidity
-			// rain rate
-			// etc
+		default:
 
 			wp.mutex.Unlock()
 
