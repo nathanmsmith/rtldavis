@@ -188,10 +188,7 @@ func (wp *WeatherProcessor) processMessages() {
 				slog.Info("Unknown message type", "raw_message", bytesToSpacedHex(message.Data), "message_type", GetMessageType(message))
 			}
 
-		default:
-
 			wp.mutex.Unlock()
-
 		case <-wp.done:
 			return
 		}
@@ -242,8 +239,8 @@ func (wp *WeatherProcessor) sendData() {
 
 	slog.Info("Successfully POSTed weather data", "payload", payload)
 
-	if resp.StatusCode != http.StatusOK {
-		slog.Error("Server returned non-OK status", "status", resp.Status)
+	if resp.StatusCode != http.StatusCreated {
+		slog.Error("Server returned non-Created status", "status", resp.Status)
 		return
 	}
 
@@ -252,6 +249,7 @@ func (wp *WeatherProcessor) sendData() {
 
 // Clear out any existing weather data.
 func (wp *WeatherProcessor) clearData() {
+	slog.Info("Clearing data")
 	wp.data = WeatherDatum{}
 }
 
