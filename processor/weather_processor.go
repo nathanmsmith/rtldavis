@@ -43,11 +43,18 @@ type UVDatum struct {
 	ReceivedAt time.Time `json:"received_at"`
 }
 
+type CapacitorDatum struct {
+	Voltage    float32   `json:"voltage"`
+	ReceivedAt time.Time `json:"received_at"`
+}
+
 type WeatherDatum struct {
 	Temperature *TemperatureDatum `json:"temperature"`
 	Wind        *WindDatum        `json:"wind"`
 	Rain        *RainDatum        `json:"rain"`
-	SentAt      time.Time         `json:"sent_at"`
+
+	Capacitor *CapacitorDatum `json:"capacitor"`
+	SentAt    time.Time       `json:"sent_at"`
 }
 
 // POSTs weather data to a server every N seconds
@@ -113,8 +120,18 @@ func (wp *WeatherProcessor) processMessages() {
 
 			switch GetMessageType(message) {
 
-			// TODO: voltage of goldcap Msg-ID
+			// Super capacitor voltage
 			case 0x02:
+				voltage, err := DecodeSupercap(message)
+				if err == nil {
+					wp.data.Capacitor = &CapacitorDatum{
+						Voltage:    voltage,
+						ReceivedAt: message.ReceivedAt,
+					}
+					slog.Info("Saved super capacitor data, will send soon", "voltage", voltage)
+				} else {
+					slog.Error("Could not decode temperature from packet", "error", err)
+				}
 
 			// UV Index
 			// https://github.com/dekay/DavisRFM69/wiki/Message-Protocol#message-4-uv-index
