@@ -113,8 +113,18 @@ func (wp *WeatherProcessor) processMessages() {
 
 			switch GetMessageType(message) {
 
-			// TODO: voltage of goldcap Msg-ID
+			// Super capacitor voltage
 			case 0x02:
+				_, err := DecodeSupercap(message)
+				if err == nil {
+					// wp.data.Capacitor = &RainDatum{
+					// 	InchesPerHour: inchesPerHour,
+					// 	ReceivedAt:    message.ReceivedAt,
+					// }
+					// slog.Info("Saved rain rate data, will send soon", "inchesPerHour", inchesPerHour)
+				} else {
+					slog.Error("Could not decode temperature from packet", "error", err)
+				}
 
 			// UV Index
 			// https://github.com/dekay/DavisRFM69/wiki/Message-Protocol#message-4-uv-index
