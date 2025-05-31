@@ -34,12 +34,12 @@ type RainDatum struct {
 }
 
 type SolarDatum struct {
-	// Temperature *float32  `json:"temperature"`
+	Radiation  float32   `json:"radiation"`
 	ReceivedAt time.Time `json:"received_at"`
 }
 
 type UVDatum struct {
-	// UVIndex    *float32  `json:"uv_index"`
+	UVIndex    float32   `json:"uv_index"`
 	ReceivedAt time.Time `json:"received_at"`
 }
 
@@ -52,6 +52,7 @@ type WeatherDatum struct {
 	Temperature *TemperatureDatum `json:"temperature"`
 	Wind        *WindDatum        `json:"wind"`
 	Rain        *RainDatum        `json:"rain"`
+	UV          *UVDatum          `json:"uv"`
 
 	Capacitor *CapacitorDatum `json:"capacitor"`
 	SentAt    time.Time       `json:"sent_at"`
@@ -60,12 +61,7 @@ type WeatherDatum struct {
 // POSTs weather data to a server every N seconds
 // or when all data is collected.
 type WeatherProcessor struct {
-	// The data
-	data WeatherDatum
-	// temperature *TemperatureDatum
-	// wind        *WindDatum
-	// humidity    *HumidityDatum
-
+	data        WeatherDatum
 	mutex       sync.Mutex
 	batchSize   int
 	interval    time.Duration
@@ -130,12 +126,21 @@ func (wp *WeatherProcessor) processMessages() {
 					}
 					slog.Info("Saved super capacitor data, will send soon", "voltage", voltage)
 				} else {
-					slog.Error("Could not decode temperature from packet", "error", err)
+					slog.Error("Could not decode super capacitor voltage from packet", "error", err)
 				}
 
 			// UV Index
-			// https://github.com/dekay/DavisRFM69/wiki/Message-Protocol#message-4-uv-index
 			case 0x04:
+				uvIndex, err := DecodeSupercap(message)
+				if err == nil {
+					wp.data.UV = &UVDatum{
+						UVIndex:    uvIndex,
+						ReceivedAt: message.ReceivedAt,
+					}
+					slog.Info("Saved UV index data, will send soon", "uvIndex", uvIndex)
+				} else {
+					slog.Error("Could not decode UV index from packet", "error", err)
+				}
 
 			// Rain Rate
 			case 0x05:

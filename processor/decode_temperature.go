@@ -11,7 +11,7 @@ import (
 // Decode the temperature reading from a message.
 // Returns an error if there is no temperature reading.
 func DecodeTemperature(m protocol.Message) (float32, error) {
-	// From https://github.com/dekay/im-me/blob/master/pocketwx/src/protocol.txt:
+	// From Dekay (https://github.com/dekay/DavisRFM69/wiki/Message-Protocol):
 	// > Byte 3 and 4 are temperature.  The first byte is MSB and the second LSB.  The
 	// > value is signed with 0x0000 representing 0F.  This reading in the old version
 	// > of the ISS was taked from an analog sensor and measured by an A/D.  The newer
@@ -38,7 +38,8 @@ func DecodeTemperature(m protocol.Message) (float32, error) {
 		return -1, errors.New("temperature reading is not from digital sensor. Analog sensor not supported")
 	}
 
-	raw := (int16(m.Data[3]) << 4) + (int16(m.Data[4]) >> 4)
+	// Take the top 12 bits of the double byte
+	raw := (doublebyte(m.Data[3])<<8 | doublebyte(m.Data[4])) >> 4
 	if raw == 0x0FFC {
 		return -1, errors.New("no sensor")
 	}
