@@ -39,6 +39,7 @@ func DecodeWindDirection(m protocol.Message) int16 {
 	// Kobuki and rdsman then seem to differ on the constant to multiply this by.
 	// I think Kobuki is right based off empirical evidence.
 	// https://github.com/kobuki/VPTools/blob/master/Examples/ISSRx/ISSRx.ino#L93
+	// TODO: test this more
 
 	luc_wind_dir := float32(m.Data[2])*1.40625 + 0.3
 	dekay_wind_dir := float64(m.Data[2]) * 360 / 255
