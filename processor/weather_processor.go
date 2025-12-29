@@ -70,15 +70,17 @@ type WeatherProcessor struct {
 	batchSize   int
 	interval    time.Duration
 	serverURL   string
+	apiKey      string
 	messageChan chan protocol.Message
 	done        chan struct{}
 }
 
-func NewWeatherProcessor(serverURL string, interval time.Duration, batchSize int) *WeatherProcessor {
+func NewWeatherProcessor(serverURL string, apiKey string, interval time.Duration, batchSize int) *WeatherProcessor {
 	bp := &WeatherProcessor{
 		batchSize:   batchSize,
 		interval:    interval,
 		serverURL:   serverURL,
+		apiKey:      apiKey,
 		messageChan: make(chan protocol.Message, batchSize),
 		done:        make(chan struct{}),
 	}
@@ -242,8 +244,19 @@ func (wp *WeatherProcessor) sendData() {
 		return
 	}
 
+	// Create the HTTP POST request
+	req, err := http.NewRequest("POST", wp.serverURL, bytes.NewBuffer(payload))
+	if err != nil {
+		slog.Error("Error creating POST request", "error", err)
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-api-key", wp.apiKey)
+
 	// Send the HTTP POST request
-	resp, err := http.Post(wp.serverURL, "application/json", bytes.NewBuffer(payload))
+	client := &http.Client{}
+	resp, err := client.Do(req)
 	if err != nil {
 		slog.Error("Error POSTing data", "error", err, "payload", payload)
 		return

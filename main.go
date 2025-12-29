@@ -65,6 +65,7 @@ var (
 	disableAfc      *bool   // -noafc = disable any automatic corrections
 	deviceString    *string // -d = device serial number or device index
 	serverSrv       *string // -gs = decode the packets and send to server
+	apiKey          *string // -ak = api key for sending data to server
 	// general
 	actChan [maxTr]int // list with actual channels (0-7);
 	// nms: not sure what this comment means
@@ -152,6 +153,7 @@ func init() {
 	disableAfc = flag.Bool("noafc", false, "disable any AFC")
 	deviceString = flag.String("d", "0", "device serial number or device index")
 	serverSrv = flag.String("gs", "", "decode packets and send to server server")
+	apiKey = flag.String("ak", "", "api key for sending data to server")
 
 	flag.Parse()
 	protocol.Verbose = *verbose
@@ -313,6 +315,7 @@ func main() {
 
 	processor := processor.NewWeatherProcessor(
 		*serverSrv,
+		*apiKey,
 		5*time.Second, // Send every 5 seconds
 		100,           // or when batch size reaches 100
 	)
