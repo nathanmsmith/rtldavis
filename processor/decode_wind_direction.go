@@ -41,12 +41,12 @@ func DecodeWindDirection(m protocol.Message) int16 {
 	// https://github.com/kobuki/VPTools/blob/master/Examples/ISSRx/ISSRx.ino#L93
 	// TODO: test this more
 
-	luc_wind_dir := float32(m.Data[2])*1.40625 + 0.3
-	dekay_wind_dir := float64(m.Data[2]) * 360 / 255
+	luc_wind_dir := math.Round(float64(m.Data[2])*1.40625 + 0.3)
+	dekay_wind_dir := math.Round(float64(m.Data[2]) * 360 / 255)
 	rawDirection := (m.Data[2] << 1) | (m.Data[4]&2)>>1
 	kabuki_wind_dir := math.Round(float64(rawDirection) * 360 / 512)
 	rdsman_wind_dir := math.Round(float64(rawDirection) * 0.3515625)
-	dario_wind_dir := 9 + float32(m.Data[2])*342/255
+	dario_wind_dir := math.Round(9 + float64(m.Data[2])*342/255)
 
 	slog.Info("Parsed wind direction", "luc", luc_wind_dir, "kabuki", kabuki_wind_dir, "rdsman", rdsman_wind_dir, "dekay", dekay_wind_dir, "dario", dario_wind_dir)
 
