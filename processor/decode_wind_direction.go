@@ -17,7 +17,7 @@ func DecodeWindDirection(m protocol.Message) int16 {
 	// > scaling the byte value by 360 / 255.  A wind speed reading of 0xd3 = 211
 	// > (decimal) * 360 / 255 = 297.
 	//
-	// However, this is totally out of date for Vantage Vues which apparently use a magnetic sensor instead of
+	// However, this is apparently totally out of date for Vantage Vues which apparently use a magnetic sensor instead of
 	// a potentiometer for determining wind direction.
 
 	// In his code (https://github.com/lheijst/weewx-rtldavis/blob/master/bin/user/rtldavis.py#L1049-L1059),
@@ -37,9 +37,9 @@ func DecodeWindDirection(m protocol.Message) int16 {
 	// > Bit 0 has no effect on the wind direction. Bit 1 always causes it to read 1 digit higher.
 	//
 	// Kobuki and rdsman then seem to differ on the constant to multiply this by.
-	// I think Kobuki is right based off empirical evidence.
 	// https://github.com/kobuki/VPTools/blob/master/Examples/ISSRx/ISSRx.ino#L93
-	// TODO: test this more
+	//
+	// 2026-01-01: Empirical results indicate that dekay's data is most accurate for me.
 
 	luc_wind_dir := math.Round(float64(m.Data[2])*1.40625 + 0.3)
 	dekay_wind_dir := math.Round(float64(m.Data[2]) * 360 / 255)
@@ -50,5 +50,5 @@ func DecodeWindDirection(m protocol.Message) int16 {
 
 	slog.Info("Parsed wind direction", "luc", luc_wind_dir, "kabuki", kabuki_wind_dir, "rdsman", rdsman_wind_dir, "dekay", dekay_wind_dir, "dario", dario_wind_dir)
 
-	return int16(kabuki_wind_dir)
+	return int16(dekay_wind_dir)
 }
