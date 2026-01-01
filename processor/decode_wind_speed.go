@@ -18,5 +18,8 @@ func DecodeWindSpeed(m protocol.Message) int16 {
 	//
 	// Dario also uses the raw byte.
 	// https://www.carluccio.de/davis-vue-hacking-part-2/
+	//
+	// Wind gusts can only be transmitted as an integer, but averages can be decimal
+	// https://www.wxforum.net/index.php?topic=47439.0
 	return int16(m.Data[1])
 }
