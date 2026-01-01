@@ -19,8 +19,8 @@ type WindDatum struct {
 }
 
 type TemperatureDatum struct {
-	Temperature float32   `json:"temperature"`
-	ReceivedAt  time.Time `json:"received_at"`
+	Value      float32   `json:"value"`
+	ReceivedAt time.Time `json:"received_at"`
 }
 
 type HumidityDatum struct {
@@ -191,8 +191,8 @@ func (wp *WeatherProcessor) processMessages() {
 				temperature, err := DecodeTemperature(message)
 				if err == nil {
 					wp.data.Temperature = &TemperatureDatum{
-						Temperature: temperature,
-						ReceivedAt:  message.ReceivedAt,
+						Value:      temperature,
+						ReceivedAt: message.ReceivedAt,
 					}
 					slog.Info("Saved temperature data, will send soon", "temp", temperature)
 				} else {
