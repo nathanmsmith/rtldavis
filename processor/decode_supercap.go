@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"errors"
 	"log/slog"
 
 	"github.com/nathanmsmith/rtldavis/protocol"
@@ -19,14 +20,21 @@ func DecodeSupercap(m protocol.Message) (float32, error) {
 	// Dekay defers to Dario here.
 	// https://github.com/dekay/DavisRFM69/wiki/Message-Protocol
 	//
-	// Luc's calculation is different, but he also doesn't have a Vantage Vue.
+	// Luc, Kobuki, and Matthew Wall all divide by 300 instead of 100.
 	// https://github.com/lheijst/weewx-rtldavis/blob/master/bin/user/rtldavis.py#L1098
-	//
-	// Kobuki uses 300 instead of 100. He also doesn't have a Vantage Vue
+	// https://github.com/matthewwall/weewx-meteostick/blob/master/bin/user/meteostick.py#L774-L776
 	// https://github.com/kobuki/VPTools/blob/61e39ac9c561d439939bd8bbe1b9e77b72b7be27/Examples/ISSRx/ISSRx.ino#L174
-	voltage := float32((m.Data[3]<<2)|((m.Data[4]&0xC0)>>6)) / 100
+	// https://github.com/kobuki/VPTools/issues/13
+	//
+	// They are right, the max of the super cap is ~3V, not 8.
+	// https://support.davisinstruments.com/article/0ics9tab6w-manual-vantage-vue-integrated-sensor-suite-manual-6250-6357
+	//
+	slog.Info("Supercap reading received", "raw_byte_data", bytesToSpacedHex(m.Data))
+	if GetMessageType(m) != 0x02 {
+		return -1, errors.New("message does not have supercap")
+	}
 
-	slog.Info("Parsed supercap voltage", "voltage", voltage)
+	voltage := float32((m.Data[3]<<2)|((m.Data[4]&0xC0)>>6)) / 300
 
 	return float32(voltage), nil
 }
