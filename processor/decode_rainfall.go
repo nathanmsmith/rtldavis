@@ -1,13 +1,19 @@
 package processor
 
 import (
+	"errors"
 	"log/slog"
 
 	"github.com/nathanmsmith/rtldavis/protocol"
 )
 
-// I'm not totally sure how rainfall and rain rate differ yet.
-func DecodeRainfall(m protocol.Message) {
-	rainClicks := (m.Data[3] & 0x7F)
-	slog.Info("Rain click reading received", "raw_byte_data", bytesToSpacedHex(m.Data), "rainClicks", rainClicks)
+func DecodeRainfall(m protocol.Message) (int16, error) {
+	slog.Info("Rainfall reading received", "raw_byte_data", bytesToSpacedHex(m.Data))
+
+	if GetMessageType(m) != 0x0E {
+		return -1, errors.New("message does not have rainfall")
+	}
+
+	rainClicks := int16(m.Data[3] & 0x7F)
+	return rainClicks, nil
 }

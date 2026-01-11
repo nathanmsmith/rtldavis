@@ -192,7 +192,8 @@ func (wp *WeatherProcessor) processMessages() {
 
 			// Rain clicks
 			case 0x0E:
-				DecodeRainfall(message)
+				rainfall, err := DecodeRainfall(message)
+				slog.Warn("Decoded rainfall not saving yet", "rainfall", rainfall, "err", err)
 
 			default:
 				slog.Info("Unknown message type", "raw_message", bytesToSpacedHex(message.Data), "message_type", GetMessageType(message))

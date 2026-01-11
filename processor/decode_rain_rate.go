@@ -40,13 +40,6 @@ func DecodeRainRate(m protocol.Message) (float32, error) {
 	// > 2446.8,224,9,29,41,2,0
 	// > 2457.1,224,10,29,41,3,0
 
-	//
-	// Luc Heijst's approach appears to be slightly different but return the same values.
-	// He shifts the packet bit into a 12-bit value. Temperature is reported to a tenth
-	// of a degree, so we divide by 10 to get the value in Fahrenheit.
-	//
-	// Examples
-
 	// https://github.com/dcbo/ISS-MQTT-Gateway
 	// https://github.com/dcbo/ISS-MQTT-Gateway/blob/1ea7bab1e7c05f49519e7f18509698e05dc9ef04/src/main.cpp#L650
 
