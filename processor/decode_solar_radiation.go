@@ -7,7 +7,7 @@ import (
 	"github.com/nathanmsmith/rtldavis/protocol"
 )
 
-func DecodeSolarVoltage(m protocol.Message) (float32, error) {
+func DecodeSolarRadiation(m protocol.Message) (float32, error) {
 	// The Davis Vantage Pro has a UV Index (0x04) and Solar Radiation (0x06) sensor.
 	// Dekay has documented both here: https://github.com/dekay/im-me/blob/master/pocketwx/src/protocol.txt
 	// The Vantage Vue has neither, but has a solar panel voltage sensor (0x07).
@@ -22,7 +22,7 @@ func DecodeSolarVoltage(m protocol.Message) (float32, error) {
 	// https://github.com/HydroSense/FeatherM0_Davis_ISS_rx/blob/4d0fa1d2adae59eabcc53f4300e2acf0090b87bd/FeatherM0_Davis_ISS_rx.ino#L235
 
 	slog.Info("Solar voltage reading received", "raw_byte_data", bytesToSpacedHex(m.Data))
-	if GetMessageType(m) != 0x06 {
+	if GetMessageType(m) != 0x07 {
 		return -1, errors.New("message does not have solar voltage reading")
 	}
 
@@ -30,6 +30,6 @@ func DecodeSolarVoltage(m protocol.Message) (float32, error) {
 		return -1, errors.New("no sensor")
 	}
 
-	radiation := float32(((int16(m.Data[3])<<8)+int16(m.Data[4]))>>6) * 1.757936
-	return radiation, nil
+	solarRadiation := float32((m.Data[3] << 2) | ((m.Data[4] & 0xC0) >> 6))
+	return solarRadiation, nil
 }

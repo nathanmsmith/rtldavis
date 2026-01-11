@@ -24,7 +24,7 @@ func DecodeSupercap(m protocol.Message) (float32, error) {
 	//
 	// Kobuki uses 300 instead of 100. He also doesn't have a Vantage Vue
 	// https://github.com/kobuki/VPTools/blob/61e39ac9c561d439939bd8bbe1b9e77b72b7be27/Examples/ISSRx/ISSRx.ino#L174
-	voltage := float32((m.Data[3]<<2)+((m.Data[4]&0xC0)>>6)) / 100
+	voltage := float32((m.Data[3]<<2)|((m.Data[4]&0xC0)>>6)) / 100
 
 	slog.Info("Parsed supercap voltage", "voltage", voltage)
 

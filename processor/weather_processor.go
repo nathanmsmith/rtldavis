@@ -138,6 +138,7 @@ func (wp *WeatherProcessor) processMessages() {
 			// UV Index
 			// https://github.com/dekay/DavisRFM69/wiki/Message-Protocol#message-4-uv-index
 			case 0x04:
+				slog.Error("Detected a UV Index reading. This is unexpected!!")
 
 			// Rain Rate
 			case 0x05:
@@ -152,11 +153,14 @@ func (wp *WeatherProcessor) processMessages() {
 					slog.Error("Could not decode temperature from packet", "error", err)
 				}
 
+			case 0x06:
+				slog.Error("Detected a solar radiation reading. This is unexpected!!")
+
 			// todo: Solar radiation?
 			// https://github.com/dekay/DavisRFM69/wiki/Message-Protocol#message-6-solar-radiation
 			// Dario says it's 0x07, Dekay 0x06
 			// https://www.carluccio.de/davis-vue-hacking-part-2/
-			case 0x06, 0x07:
+			case 0x07:
 				//    elif message_type == 6:
 				//     # solar radiation
 				//     # message examples
