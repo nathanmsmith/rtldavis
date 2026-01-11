@@ -10,11 +10,8 @@ func DecodeHumidity(m protocol.Message) (float32, error) {
 	// >Bits 5 and 4 in Byte 4 are the two most significant bits.  Byte 3 is the
 	// >low order byte. The ten bit value is then 10x the humidity value displayed on
 	// >the console.  The function of the four low order bits in Byte 3 that cause the
-	// >apparent jitter are not known.  Here is an example.
+	// >apparent jitter are not known.
 	//
-	// a0 06 52 83 38 00 5a c8
-	//
-	// ((0x38 >> 4) << 8) + 0x83 = 131 + 768 = 899 = 89.9% Relative Humidity
 	//
 	// The displayed humidity at the time was 90%.  The console rounds the value.
 	// http://madscientistlabs.blogspot.com/2012/05/its-not-heat.html
@@ -23,6 +20,6 @@ func DecodeHumidity(m protocol.Message) (float32, error) {
 	//       g_outsideHumidity = (float)(word((radio.data(4) >> 4), radio.data(3))) / 10.0;
 	// https://github.com/dcbo/ISS-MQTT-Gateway/blob/master/src/main.cpp
 
-	humidity := float32((m.Data[4]>>4)<<8|m.Data[3]) / 10.0
+	humidity := float32((int16(m.Data[4]>>4))<<8|int16(m.Data[3])) / 10.0
 	return humidity, nil
 }
