@@ -6,6 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// Data from here: https://www.wxforum.net/index.php?topic=18489.msg178506#msg178506
+
 func TestDecodeSolarRadiationInvalidMessage(t *testing.T) {
 	message := createMessage([]byte{0x80, 0x00, 0x00, 0x45, 0x00, 0xAD, 0x21})
 
@@ -43,7 +45,7 @@ func TestDecodeSolarRadiation7(t *testing.T) {
 
 	radiation, err := DecodeSolarRadiation(message)
 	assert.NoError(t, err)
-	assert.Equal(t, float32(7.031744), radiation)
+	assert.Equal(t, 7, radiation)
 }
 
 func TestDecodeSolarRadiation11(t *testing.T) {

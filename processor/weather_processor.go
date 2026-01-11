@@ -24,7 +24,7 @@ type TemperatureDatum struct {
 }
 
 type HumidityDatum struct {
-	Humidity   float32   `json:"humidity"`
+	Value      float32   `json:"value"`
 	ReceivedAt time.Time `json:"received_at"`
 }
 
@@ -52,6 +52,7 @@ type WeatherDatum struct {
 	Temperature *TemperatureDatum `json:"temperature"`
 	Wind        *WindDatum        `json:"wind"`
 	Rain        *RainDatum        `json:"rain"`
+	Humidity    *HumidityDatum    `json:"humidity"`
 
 	Capacitor *CapacitorDatum `json:"capacitor"`
 	SentAt    time.Time       `json:"sent_at"`
@@ -64,7 +65,6 @@ type WeatherProcessor struct {
 	data WeatherDatum
 	// temperature *TemperatureDatum
 	// wind        *WindDatum
-	// humidity    *HumidityDatum
 
 	mutex       sync.Mutex
 	batchSize   int
@@ -201,7 +201,18 @@ func (wp *WeatherProcessor) processMessages() {
 
 			// gust speed Msg-ID 0x9 (every 50 seconds):
 
-			// outside humidity Msg-ID 0xA (every 50 seconds):
+			// Humidity (every 50 seconds)
+			case 0x0A:
+				humidity, err := DecodeHumidity(message)
+				if err == nil {
+					wp.data.Humidity = &HumidityDatum{
+						Value:      humidity,
+						ReceivedAt: message.ReceivedAt,
+					}
+					slog.Info("Saved humidity data, will send soon", "temp", humidity)
+				} else {
+					slog.Error("Could not decode humidity from packet", "error", err)
+				}
 
 			default:
 				slog.Info("Unknown message type", "raw_message", bytesToSpacedHex(message.Data), "message_type", GetMessageType(message))

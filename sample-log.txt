@@ -1,0 +1,309 @@
+in ~/D/rtldavis on main
+› /Users/nathan/Developer/go/bin/rtldavis -tf US -gs https://phinneyweather.com/api/v1/readings -ak stn_Vs8J7OSOGfxT1b5QQOeuOflyi-3hfIygZ54SHL0KrTU
+19:10:55.137628 rtldavis.go VERSION=0.15.2nms
+19:10:55.137771 tr=1 fc=0 ppm=0 gain=0 maxmissed=51 ex=0 receiveWindow=300 actChan=[0] maxChan=1
+19:10:55.137790 undefined=false verbose=false disableAfc=false deviceString=0
+19:10:55.137879 INFO Configured a new packet parser
+19:10:55.137889 BitRate: 19200
+19:10:55.137893 SymbolLength: 14
+19:10:55.137895 SampleRate: 268800
+19:10:55.137897 Preamble: 1100101110001001
+19:10:55.137899 PreambleSymbols: 16
+19:10:55.137901 PreambleLength: 224
+19:10:55.137902 PacketSymbols: 80
+19:10:55.137904 PacketLength: 1120
+19:10:55.137906 BlockSize: 512
+19:10:55.137907 BufferLength: 2048
+Found Rafael Micro R828D tuner
+RTL-SDR Blog V4 Detected
+19:10:55.525685 INFO Found antenna
+19:10:55.525736 Hop: {ChannelIdx:0 ChannelFreq:902419338 FreqError:0 Transmitter:0}
+Exact sample rate is: 268800.001367 Hz
+19:10:55.678843 GetTunerGain: 0 Db
+19:10:55.678892 SetFreqCorrection 0 ppm Successful
+19:10:55.684285 Init channels: wait max 135 seconds for a message of each transmitter
+19:11:00.518687 TRANSMITTER 0 SEEN
+19:11:00.518814 Hop: {ChannelIdx:19 ChannelFreq:911952597 FreqError:0 Transmitter:0}
+19:11:03.080454 Hop: {ChannelIdx:41 ChannelFreq:922991108 FreqError:0 Transmitter:0}
+19:11:03.080515 INFO Processing message raw_message="50 01 ab fe 73 0c 4a 79"
+19:11:03.080529 INFO Parsed wind direction luc=241 kabuki=61 rdsman=31 dekay=241 dario=238
+19:11:03.080535 INFO Saved wind data, will send soon windspeed=1 direction=61
+19:11:03.080542 INFO Rain rate reading received raw_byte_data="50 01 ab fe 73 0c 4a 79"
+19:11:03.080582 INFO Light rain detected clicksPerHour=14.17322826385498
+19:11:03.080589 INFO Saved rain rate data, will send soon inchesPerHour=0.14173227548599243
+19:11:05.644240 Hop: {ChannelIdx:25 ChannelFreq:914963100 FreqError:0 Transmitter:0}
+19:11:05.644352 INFO Processing message raw_message="80 01 b3 1d f9 07 cc f0"
+19:11:05.644381 INFO Parsed wind direction luc=252 kabuki=72 rdsman=36 dekay=253 dario=249
+19:11:05.644393 INFO Saved wind data, will send soon windspeed=1 direction=72
+19:11:05.644408 INFO Temperature reading received raw_byte_data="80 01 b3 1d f9 07 cc f0"
+19:11:05.644421 INFO Saved temperature data, will send soon temp=47.900001525878906
+19:11:05.803101 INFO Successfully POSTed weather data payload="{\"temperature\":{\"value\":47.9,\"received_at\":\"2026-01-10T19:11:05.644209-08:00\"},\"wind\":{\"speed\":1,\"direction\":72,\"received_at\":\"2026-01-10T19:11:05.644209-08:00\"},\"rain\":{\"inches_per_hour\":0.14173228,\"received_at\":\"2026-01-10T19:11:03.08044-08:00\"},\"capacitor\":null,\"sent_at\":\"2026-01-10T19:11:05.684079-08:00\"}"
+19:11:05.803137 INFO Clearing data
+19:11:08.206263 Hop: {ChannelIdx:8 ChannelFreq:906433342 FreqError:0 Transmitter:0}
+19:11:08.206354 INFO Processing message raw_message="20 02 9b ba 01 8d e3 21"
+19:11:08.206398 INFO Parsed wind direction luc=218 kabuki=38 rdsman=19 dekay=219 dario=217
+19:11:08.206420 INFO Saved wind data, will send soon windspeed=2 direction=38
+19:11:08.206433 INFO Parsed supercap voltage voltage=2.319999933242798
+19:11:08.206458 INFO Saved super capacitor data, will send soon voltage=2.319999933242798
+19:11:10.768191 Hop: {ChannelIdx:47 ChannelFreq:926001611 FreqError:0 Transmitter:0}
+19:11:10.768224 INFO Processing message raw_message="e0 04 c0 40 01 02 bf 44"
+19:11:10.768301 INFO Parsed wind direction luc=270 kabuki=90 rdsman=45 dekay=271 dario=267
+19:11:10.768313 INFO Saved wind data, will send soon windspeed=4 direction=90
+19:11:10.768331 INFO Rain click reading received raw_byte_data="e0 04 c0 40 01 02 bf 44" rainClicks=64
+19:11:13.332069 Hop: {ChannelIdx:32 ChannelFreq:918475353 FreqError:0 Transmitter:0}
+19:11:13.332130 INFO Processing message raw_message="50 06 94 fe 71 0b c3 2f"
+19:11:13.332162 INFO Parsed wind direction luc=208 kabuki=28 rdsman=14 dekay=209 dario=207
+19:11:13.332175 INFO Saved wind data, will send soon windspeed=6 direction=28
+19:11:13.332190 INFO Rain rate reading received raw_byte_data="50 06 94 fe 71 0b c3 2f"
+19:11:13.332201 INFO Light rain detected clicksPerHour=14.17322826385498
+19:11:13.332214 INFO Saved rain rate data, will send soon inchesPerHour=0.14173227548599243
+19:11:15.894024 Hop: {ChannelIdx:13 ChannelFreq:908942094 FreqError:0 Transmitter:0}
+19:11:15.894080 INFO Processing message raw_message="80 08 9e 1d fb 02 5c 83"
+19:11:15.894110 INFO Parsed wind direction luc=222 kabuki=43 rdsman=21 dekay=223 dario=221
+19:11:15.894122 INFO Saved wind data, will send soon windspeed=8 direction=43
+19:11:15.894137 INFO Temperature reading received raw_byte_data="80 08 9e 1d fb 02 5c 83"
+19:11:15.894153 INFO Saved temperature data, will send soon temp=47.900001525878906
+19:11:18.455858 Hop: {ChannelIdx:36 ChannelFreq:920482355 FreqError:0 Transmitter:0}
+19:11:18.455895 INFO Processing message raw_message="70 08 9a 05 c1 8e 57 56"
+19:11:18.455916 INFO Parsed wind direction luc=217 kabuki=37 rdsman=18 dekay=217 dario=216
+19:11:18.455923 INFO Saved wind data, will send soon windspeed=8 direction=37
+19:11:20.705041 INFO Successfully POSTed weather data payload="{\"temperature\":{\"value\":47.9,\"received_at\":\"2026-01-10T19:11:15.893983-08:00\"},\"wind\":{\"speed\":8,\"direction\":37,\"received_at\":\"2026-01-10T19:11:18.455845-08:00\"},\"rain\":{\"inches_per_hour\":0.14173228,\"received_at\":\"2026-01-10T19:11:13.332041-08:00\"},\"capacitor\":{\"voltage\":2.32,\"received_at\":\"2026-01-10T19:11:08.206201-08:00\"},\"sent_at\":\"2026-01-10T19:11:20.684146-08:00\"}"
+19:11:20.705115 INFO Clearing data
+19:11:21.019621 Hop: {ChannelIdx:22 ChannelFreq:913457849 FreqError:0 Transmitter:0}
+19:11:21.019688 INFO Processing message raw_message="e0 0a b0 40 01 08 93 d3"
+19:11:21.019712 INFO Parsed wind direction luc=248 kabuki=68 rdsman=34 dekay=248 dario=245
+19:11:21.019722 INFO Saved wind data, will send soon windspeed=10 direction=68
+19:11:21.019800 INFO Rain click reading received raw_byte_data="e0 0a b0 40 01 08 93 d3" rainClicks=64
+19:11:23.581441 Hop: {ChannelIdx:3 ChannelFreq:903924589 FreqError:0 Transmitter:0}
+19:11:23.581477 INFO Processing message raw_message="50 0a a3 fe 71 02 a4 e9"
+19:11:23.581495 INFO Parsed wind direction luc=230 kabuki=49 rdsman=25 dekay=230 dario=228
+19:11:23.581501 INFO Saved wind data, will send soon windspeed=10 direction=49
+19:11:23.581508 INFO Rain rate reading received raw_byte_data="50 0a a3 fe 71 02 a4 e9"
+19:11:23.581513 INFO Light rain detected clicksPerHour=14.17322826385498
+19:11:23.581518 INFO Saved rain rate data, will send soon inchesPerHour=0.14173227548599243
+19:11:26.143428 Hop: {ChannelIdx:29 ChannelFreq:916970102 FreqError:0 Transmitter:0}
+19:11:26.143482 INFO Processing message raw_message="80 07 a1 1d e9 0a 25 64"
+19:11:26.143515 INFO Parsed wind direction luc=227 kabuki=46 rdsman=23 dekay=227 dario=225
+19:11:26.143527 INFO Saved wind data, will send soon windspeed=7 direction=46
+19:11:26.143544 INFO Temperature reading received raw_byte_data="80 07 a1 1d e9 0a 25 64"
+19:11:26.143558 INFO Saved temperature data, will send soon temp=47.79999923706055
+19:11:28.705411 Hop: {ChannelIdx:44 ChannelFreq:924496359 FreqError:0 Transmitter:0}
+19:11:28.705460 INFO Processing message raw_message="30 05 9f fd 03 88 fa 7a"
+19:11:28.705492 INFO Parsed wind direction luc=224 kabuki=44 rdsman=22 dekay=224 dario=222
+19:11:28.705505 INFO Saved wind data, will send soon windspeed=5 direction=44
+19:11:28.705522 INFO Unknown message type raw_message="30 05 9f fd 03 88 fa 7a" message_type=3
+19:11:30.715594 INFO Successfully POSTed weather data payload="{\"temperature\":{\"value\":47.8,\"received_at\":\"2026-01-10T19:11:26.143401-08:00\"},\"wind\":{\"speed\":5,\"direction\":44,\"received_at\":\"2026-01-10T19:11:28.705382-08:00\"},\"rain\":{\"inches_per_hour\":0.14173228,\"received_at\":\"2026-01-10T19:11:23.581427-08:00\"},\"capacitor\":null,\"sent_at\":\"2026-01-10T19:11:30.684208-08:00\"}"
+19:11:30.715648 INFO Clearing data
+19:11:31.269176 Hop: {ChannelIdx:16 ChannelFreq:910447346 FreqError:0 Transmitter:0}
+19:11:31.269223 INFO Processing message raw_message="e0 05 9b 40 01 01 4e 52"
+19:11:31.269247 INFO Parsed wind direction luc=218 kabuki=38 rdsman=19 dekay=219 dario=217
+19:11:31.269257 INFO Saved wind data, will send soon windspeed=5 direction=38
+19:11:31.269272 INFO Rain click reading received raw_byte_data="e0 05 9b 40 01 01 4e 52" rainClicks=64
+19:11:33.830914 Hop: {ChannelIdx:5 ChannelFreq:904928090 FreqError:0 Transmitter:0}
+19:11:33.830972 INFO Processing message raw_message="50 05 9f fe 73 0b 55 80"
+19:11:33.831004 INFO Parsed wind direction luc=224 kabuki=44 rdsman=22 dekay=224 dario=222
+19:11:33.831016 INFO Saved wind data, will send soon windspeed=5 direction=44
+19:11:33.831030 INFO Rain rate reading received raw_byte_data="50 05 9f fe 73 0b 55 80"
+19:11:33.831043 INFO Light rain detected clicksPerHour=14.17322826385498
+19:11:33.831055 INFO Saved rain rate data, will send soon inchesPerHour=0.14173227548599243
+19:11:36.392901 Hop: {ChannelIdx:27 ChannelFreq:915966601 FreqError:0 Transmitter:0}
+19:11:36.392942 INFO Processing message raw_message="80 05 ab 1d eb 03 fe 07"
+19:11:36.393024 INFO Parsed wind direction luc=241 kabuki=61 rdsman=31 dekay=241 dario=238
+19:11:36.393038 INFO Saved wind data, will send soon windspeed=5 direction=61
+19:11:36.393054 INFO Temperature reading received raw_byte_data="80 05 ab 1d eb 03 fe 07"
+19:11:36.393065 INFO Saved temperature data, will send soon temp=47.79999923706055
+19:11:38.956896 Hop: {ChannelIdx:38 ChannelFreq:921485856 FreqError:0 Transmitter:0}
+19:11:38.956952 INFO Processing message raw_message="90 03 8e 0a 61 8a 90 0c"
+19:11:38.957013 INFO Parsed wind direction luc=200 kabuki=20 rdsman=10 dekay=200 dario=199
+19:11:38.957026 INFO Saved wind data, will send soon windspeed=3 direction=20
+19:11:38.957046 INFO Unknown message type raw_message="90 03 8e 0a 61 8a 90 0c" message_type=9
+19:11:40.704719 INFO Successfully POSTed weather data payload="{\"temperature\":{\"value\":47.8,\"received_at\":\"2026-01-10T19:11:36.392833-08:00\"},\"wind\":{\"speed\":3,\"direction\":20,\"received_at\":\"2026-01-10T19:11:38.956871-08:00\"},\"rain\":{\"inches_per_hour\":0.14173228,\"received_at\":\"2026-01-10T19:11:33.830886-08:00\"},\"capacitor\":null,\"sent_at\":\"2026-01-10T19:11:40.684344-08:00\"}"
+19:11:40.704763 INFO Clearing data
+19:11:41.518756 Hop: {ChannelIdx:10 ChannelFreq:907436843 FreqError:0 Transmitter:0}
+19:11:41.518781 INFO Processing message raw_message="e0 07 9f 40 01 03 e0 62"
+19:11:41.518860 INFO Parsed wind direction luc=224 kabuki=44 rdsman=22 dekay=224 dario=222
+19:11:41.518869 INFO Saved wind data, will send soon windspeed=7 direction=44
+19:11:41.518882 INFO Rain click reading received raw_byte_data="e0 07 9f 40 01 03 e0 62" rainClicks=64
+19:11:44.080709 Hop: {ChannelIdx:49 ChannelFreq:927005112 FreqError:0 Transmitter:0}
+19:11:44.080786 INFO Processing message raw_message="50 08 9d fe 73 02 08 bb"
+19:11:44.080815 INFO Parsed wind direction luc=221 kabuki=41 rdsman=21 dekay=222 dario=220
+19:11:44.080827 INFO Saved wind data, will send soon windspeed=8 direction=41
+19:11:44.080840 INFO Rain rate reading received raw_byte_data="50 08 9d fe 73 02 08 bb"
+19:11:44.080852 INFO Light rain detected clicksPerHour=14.17322826385498
+19:11:44.080863 INFO Saved rain rate data, will send soon inchesPerHour=0.14173227548599243
+19:11:46.643612 Hop: {ChannelIdx:21 ChannelFreq:912956099 FreqError:0 Transmitter:0}
+19:11:46.643661 INFO Processing message raw_message="80 07 9d 1d eb 03 b1 f4"
+19:11:46.643681 INFO Parsed wind direction luc=221 kabuki=41 rdsman=21 dekay=222 dario=220
+19:11:46.643689 INFO Saved wind data, will send soon windspeed=7 direction=41
+19:11:46.643699 INFO Temperature reading received raw_byte_data="80 07 9d 1d eb 03 b1 f4"
+19:11:46.643709 INFO Saved temperature data, will send soon temp=47.79999923706055
+19:11:49.205501 Hop: {ChannelIdx:2 ChannelFreq:903422839 FreqError:0 Transmitter:0}
+19:11:49.205530 INFO Processing message raw_message="a0 05 c0 ef 2b 01 37 e6"
+19:11:49.205544 INFO Parsed wind direction luc=270 kabuki=91 rdsman=45 dekay=271 dario=267
+19:11:49.205551 INFO Saved wind data, will send soon windspeed=5 direction=91
+19:11:49.205558 INFO Unknown message type raw_message="a0 05 c0 ef 2b 01 37 e6" message_type=10
+19:11:50.705955 INFO Successfully POSTed weather data payload="{\"temperature\":{\"value\":47.8,\"received_at\":\"2026-01-10T19:11:46.643586-08:00\"},\"wind\":{\"speed\":5,\"direction\":91,\"received_at\":\"2026-01-10T19:11:49.20549-08:00\"},\"rain\":{\"inches_per_hour\":0.14173228,\"received_at\":\"2026-01-10T19:11:44.080687-08:00\"},\"capacitor\":null,\"sent_at\":\"2026-01-10T19:11:50.683658-08:00\"}"
+19:11:50.706014 INFO Clearing data
+19:11:51.769250 Hop: {ChannelIdx:30 ChannelFreq:917471852 FreqError:0 Transmitter:0}
+19:11:51.769319 INFO Processing message raw_message="e0 04 8f 40 01 0b 94 1f"
+19:11:51.769349 INFO Parsed wind direction luc=201 kabuki=21 rdsman=11 dekay=202 dario=201
+19:11:51.769360 INFO Saved wind data, will send soon windspeed=4 direction=21
+19:11:51.769379 INFO Rain click reading received raw_byte_data="e0 04 8f 40 01 0b 94 1f" rainClicks=64
+19:11:54.331161 Hop: {ChannelIdx:42 ChannelFreq:923492858 FreqError:0 Transmitter:0}
+19:11:54.331213 INFO Processing message raw_message="50 04 ab fe 73 0d 79 0f"
+19:11:54.331239 INFO Parsed wind direction luc=241 kabuki=61 rdsman=31 dekay=241 dario=238
+19:11:54.331250 INFO Saved wind data, will send soon windspeed=4 direction=61
+19:11:54.331264 INFO Rain rate reading received raw_byte_data="50 04 ab fe 73 0d 79 0f"
+19:11:54.331274 INFO Light rain detected clicksPerHour=14.17322826385498
+19:11:54.331284 INFO Saved rain rate data, will send soon inchesPerHour=0.14173227548599243
+19:11:56.893094 Hop: {ChannelIdx:14 ChannelFreq:909443845 FreqError:0 Transmitter:0}
+19:11:56.893146 INFO Processing message raw_message="80 04 a5 1d eb 0d 17 c2"
+19:11:56.893203 INFO Parsed wind direction luc=232 kabuki=53 rdsman=26 dekay=233 dario=230
+19:11:56.893216 INFO Saved wind data, will send soon windspeed=4 direction=53
+19:11:56.893231 INFO Temperature reading received raw_byte_data="80 04 a5 1d eb 0d 17 c2"
+19:11:56.893244 INFO Saved temperature data, will send soon temp=47.79999923706055
+19:11:59.457177 INFO Processing message raw_message="20 04 b0 b9 c1 85 c9 f9"
+19:11:59.457240 INFO Parsed wind direction luc=248 kabuki=68 rdsman=34 dekay=248 dario=245
+19:11:59.457253 INFO Saved wind data, will send soon windspeed=4 direction=68
+19:11:59.457271 INFO Parsed supercap voltage voltage=2.309999942779541
+19:11:59.457282 INFO Saved super capacitor data, will send soon voltage=2.309999942779541
+19:11:59.457114 Hop: {ChannelIdx:48 ChannelFreq:926503361 FreqError:0 Transmitter:0}
+19:12:00.705534 INFO Successfully POSTed weather data payload="{\"temperature\":{\"value\":47.8,\"received_at\":\"2026-01-10T19:11:56.893062-08:00\"},\"wind\":{\"speed\":4,\"direction\":68,\"received_at\":\"2026-01-10T19:11:59.457092-08:00\"},\"rain\":{\"inches_per_hour\":0.14173228,\"received_at\":\"2026-01-10T19:11:54.331143-08:00\"},\"capacitor\":{\"voltage\":2.31,\"received_at\":\"2026-01-10T19:11:59.457092-08:00\"},\"sent_at\":\"2026-01-10T19:12:00.683736-08:00\"}"
+19:12:00.705589 INFO Clearing data
+19:12:02.019082 Hop: {ChannelIdx:7 ChannelFreq:905931591 FreqError:0 Transmitter:0}
+19:12:02.019193 INFO Processing message raw_message="e0 03 a7 40 03 05 c6 ea"
+19:12:02.019221 INFO Parsed wind direction luc=235 kabuki=56 rdsman=28 dekay=236 dario=233
+19:12:02.019233 INFO Saved wind data, will send soon windspeed=3 direction=56
+19:12:02.019249 INFO Rain click reading received raw_byte_data="e0 03 a7 40 03 05 c6 ea" rainClicks=64
+19:12:04.580966 Hop: {ChannelIdx:24 ChannelFreq:914461350 FreqError:0 Transmitter:0}
+19:12:04.581043 INFO Processing message raw_message="50 04 a6 fe 73 02 b1 66"
+19:12:04.581119 INFO Parsed wind direction luc=234 kabuki=54 rdsman=27 dekay=234 dario=232
+19:12:04.581133 INFO Saved wind data, will send soon windspeed=4 direction=54
+19:12:04.581156 INFO Rain rate reading received raw_byte_data="50 04 a6 fe 73 02 b1 66"
+19:12:04.581168 INFO Light rain detected clicksPerHour=14.17322826385498
+19:12:04.581178 INFO Saved rain rate data, will send soon inchesPerHour=0.14173227548599243
+19:12:07.142827 Hop: {ChannelIdx:34 ChannelFreq:919478854 FreqError:0 Transmitter:0}
+19:12:07.142881 INFO Processing message raw_message="80 04 b1 1d e9 04 31 df"
+19:12:07.142953 INFO Parsed wind direction luc=249 kabuki=69 rdsman=34 dekay=250 dario=246
+19:12:07.142967 INFO Saved wind data, will send soon windspeed=4 direction=69
+19:12:07.142984 INFO Temperature reading received raw_byte_data="80 04 b1 1d e9 04 31 df"
+19:12:07.142997 INFO Saved temperature data, will send soon temp=47.79999923706055
+19:12:09.706894 Hop: {ChannelIdx:45 ChannelFreq:924998110 FreqError:0 Transmitter:0}
+19:12:09.706948 INFO Processing message raw_message="70 03 b4 05 01 81 c9 06"
+19:12:09.707003 INFO Parsed wind direction luc=253 kabuki=73 rdsman=37 dekay=254 dario=250
+19:12:09.707015 INFO Saved wind data, will send soon windspeed=3 direction=73
+19:12:10.717664 INFO Successfully POSTed weather data payload="{\"temperature\":{\"value\":47.8,\"received_at\":\"2026-01-10T19:12:07.142798-08:00\"},\"wind\":{\"speed\":3,\"direction\":73,\"received_at\":\"2026-01-10T19:12:09.706866-08:00\"},\"rain\":{\"inches_per_hour\":0.14173228,\"received_at\":\"2026-01-10T19:12:04.580936-08:00\"},\"capacitor\":null,\"sent_at\":\"2026-01-10T19:12:10.683838-08:00\"}"
+19:12:10.717719 INFO Clearing data
+19:12:12.268748 Hop: {ChannelIdx:1 ChannelFreq:902921088 FreqError:0 Transmitter:0}
+19:12:12.268890 INFO Processing message raw_message="e0 02 b6 40 03 03 61 6e"
+19:12:12.269011 INFO Parsed wind direction luc=256 kabuki=77 rdsman=38 dekay=257 dario=253
+19:12:12.269022 INFO Saved wind data, will send soon windspeed=2 direction=77
+19:12:12.269041 INFO Rain click reading received raw_byte_data="e0 02 b6 40 03 03 61 6e" rainClicks=64
+19:12:14.830732 Hop: {ChannelIdx:17 ChannelFreq:910949096 FreqError:0 Transmitter:0}
+19:12:14.830783 INFO Processing message raw_message="50 01 b6 fe 72 0a 3b af"
+19:12:14.830849 INFO Parsed wind direction luc=256 kabuki=77 rdsman=38 dekay=257 dario=253
+19:12:14.830863 INFO Saved wind data, will send soon windspeed=1 direction=77
+19:12:14.830881 INFO Rain rate reading received raw_byte_data="50 01 b6 fe 72 0a 3b af"
+19:12:14.830893 INFO Light rain detected clicksPerHour=14.17322826385498
+19:12:14.830904 INFO Saved rain rate data, will send soon inchesPerHour=0.14173227548599243
+19:12:17.394373 Hop: {ChannelIdx:39 ChannelFreq:921987607 FreqError:0 Transmitter:0}
+19:12:17.394440 INFO Processing message raw_message="80 01 ab 1d eb 0a e6 28"
+19:12:17.394510 INFO Parsed wind direction luc=241 kabuki=61 rdsman=31 dekay=241 dario=238
+19:12:17.394521 INFO Saved wind data, will send soon windspeed=1 direction=61
+19:12:17.394535 INFO Temperature reading received raw_byte_data="80 01 ab 1d eb 0a e6 28"
+19:12:17.394546 INFO Saved temperature data, will send soon temp=47.79999923706055
+19:12:19.955922 Hop: {ChannelIdx:26 ChannelFreq:915464850 FreqError:0 Transmitter:0}
+19:12:19.955972 INFO Processing message raw_message="30 02 a7 fd 01 8c 12 62"
+19:12:19.955994 INFO Parsed wind direction luc=235 kabuki=55 rdsman=27 dekay=236 dario=233
+19:12:19.956001 INFO Saved wind data, will send soon windspeed=2 direction=55
+19:12:19.956008 INFO Unknown message type raw_message="30 02 a7 fd 01 8c 12 62" message_type=3
+19:12:20.714406 INFO Successfully POSTed weather data payload="{\"temperature\":{\"value\":47.8,\"received_at\":\"2026-01-10T19:12:17.394333-08:00\"},\"wind\":{\"speed\":2,\"direction\":55,\"received_at\":\"2026-01-10T19:12:19.955907-08:00\"},\"rain\":{\"inches_per_hour\":0.14173228,\"received_at\":\"2026-01-10T19:12:14.830706-08:00\"},\"capacitor\":null,\"sent_at\":\"2026-01-10T19:12:20.683559-08:00\"}"
+19:12:20.714461 INFO Clearing data
+19:12:22.517806 Hop: {ChannelIdx:9 ChannelFreq:906935092 FreqError:0 Transmitter:0}
+19:12:22.517840 INFO Processing message raw_message="e0 02 88 40 03 0c 1e 32"
+19:12:22.517856 INFO Parsed wind direction luc=192 kabuki=12 rdsman=6 dekay=192 dario=191
+19:12:22.517863 INFO Saved wind data, will send soon windspeed=2 direction=12
+19:12:22.517871 INFO Rain click reading received raw_byte_data="e0 02 88 40 03 0c 1e 32" rainClicks=64
+19:12:25.081925 Hop: {ChannelIdx:31 ChannelFreq:917973603 FreqError:0 Transmitter:0}
+19:12:25.081983 INFO Processing message raw_message="50 03 a6 fe 71 08 11 9a"
+19:12:25.082015 INFO Parsed wind direction luc=234 kabuki=53 rdsman=27 dekay=234 dario=232
+19:12:25.082027 INFO Saved wind data, will send soon windspeed=3 direction=53
+19:12:25.082042 INFO Rain rate reading received raw_byte_data="50 03 a6 fe 71 08 11 9a"
+19:12:25.082057 INFO Light rain detected clicksPerHour=14.17322826385498
+19:12:25.082068 INFO Saved rain rate data, will send soon inchesPerHour=0.14173227548599243
+19:12:27.643740 Hop: {ChannelIdx:50 ChannelFreq:927506862 FreqError:0 Transmitter:0}
+19:12:27.643780 INFO Processing message raw_message="80 04 97 1d fb 0c c5 11"
+19:12:27.643795 INFO Parsed wind direction luc=213 kabuki=33 rdsman=17 dekay=213 dario=212
+19:12:27.643802 INFO Saved wind data, will send soon windspeed=4 direction=33
+19:12:27.643811 INFO Temperature reading received raw_byte_data="80 04 97 1d fb 0c c5 11"
+19:12:27.643817 INFO Saved temperature data, will send soon temp=47.900001525878906
+19:12:30.205737 Hop: {ChannelIdx:37 ChannelFreq:920984106 FreqError:0 Transmitter:0}
+19:12:30.205809 INFO Processing message raw_message="90 04 b3 0a c3 9a 8b 9a"
+19:12:30.205839 INFO Parsed wind direction luc=252 kabuki=72 rdsman=36 dekay=253 dario=249
+19:12:30.205852 INFO Saved wind data, will send soon windspeed=4 direction=72
+19:12:30.205869 INFO Unknown message type raw_message="90 04 b3 0a c3 9a 8b 9a" message_type=9
+19:12:30.721401 INFO Successfully POSTed weather data payload="{\"temperature\":{\"value\":47.9,\"received_at\":\"2026-01-10T19:12:27.643726-08:00\"},\"wind\":{\"speed\":4,\"direction\":72,\"received_at\":\"2026-01-10T19:12:30.205711-08:00\"},\"rain\":{\"inches_per_hour\":0.14173228,\"received_at\":\"2026-01-10T19:12:25.081901-08:00\"},\"capacitor\":null,\"sent_at\":\"2026-01-10T19:12:30.683665-08:00\"}"
+19:12:30.721433 INFO Clearing data
+19:12:32.769303 Hop: {ChannelIdx:12 ChannelFreq:908440344 FreqError:0 Transmitter:0}
+19:12:32.769390 INFO Processing message raw_message="e0 04 a6 40 01 0a 40 07"
+19:12:32.769404 INFO Parsed wind direction luc=234 kabuki=53 rdsman=27 dekay=234 dario=232
+19:12:32.769409 INFO Saved wind data, will send soon windspeed=4 direction=53
+19:12:32.769421 INFO Rain click reading received raw_byte_data="e0 04 a6 40 01 0a 40 07" rainClicks=64
+19:12:35.331303 Hop: {ChannelIdx:20 ChannelFreq:912454348 FreqError:0 Transmitter:0}
+19:12:35.331380 INFO Processing message raw_message="50 07 a7 fe 73 04 49 c6"
+19:12:35.331407 INFO Parsed wind direction luc=235 kabuki=56 rdsman=28 dekay=236 dario=233
+19:12:35.331417 INFO Saved wind data, will send soon windspeed=7 direction=56
+19:12:35.331428 INFO Rain rate reading received raw_byte_data="50 07 a7 fe 73 04 49 c6"
+19:12:35.331436 INFO Light rain detected clicksPerHour=14.17322826385498
+19:12:35.331445 INFO Saved rain rate data, will send soon inchesPerHour=0.14173227548599243
+19:12:37.893261 Hop: {ChannelIdx:33 ChannelFreq:918977104 FreqError:0 Transmitter:0}
+19:12:37.893313 INFO Processing message raw_message="80 06 91 1d eb 01 74 d5"
+19:12:37.893372 INFO Parsed wind direction luc=204 kabuki=25 rdsman=12 dekay=205 dario=203
+19:12:37.893384 INFO Saved wind data, will send soon windspeed=6 direction=25
+19:12:37.893399 INFO Temperature reading received raw_byte_data="80 06 91 1d eb 01 74 d5"
+19:12:37.893412 INFO Saved temperature data, will send soon temp=47.79999923706055
+19:12:40.456989 Hop: {ChannelIdx:4 ChannelFreq:904426340 FreqError:0 Transmitter:0}
+19:12:40.457149 INFO Processing message raw_message="a0 06 9c f9 2b 06 62 19"
+19:12:40.457384 INFO Parsed wind direction luc=220 kabuki=40 rdsman=20 dekay=220 dario=218
+19:12:40.457399 INFO Saved wind data, will send soon windspeed=6 direction=40
+19:12:40.457421 INFO Unknown message type raw_message="a0 06 9c f9 2b 06 62 19" message_type=10
+19:12:40.716089 INFO Successfully POSTed weather data payload="{\"temperature\":{\"value\":47.8,\"received_at\":\"2026-01-10T19:12:37.893227-08:00\"},\"wind\":{\"speed\":6,\"direction\":40,\"received_at\":\"2026-01-10T19:12:40.456882-08:00\"},\"rain\":{\"inches_per_hour\":0.14173228,\"received_at\":\"2026-01-10T19:12:35.33127-08:00\"},\"capacitor\":null,\"sent_at\":\"2026-01-10T19:12:40.683701-08:00\"}"
+19:12:40.716113 INFO Clearing data
+19:12:43.018795 Hop: {ChannelIdx:43 ChannelFreq:923994609 FreqError:0 Transmitter:0}
+19:12:43.018888 INFO Processing message raw_message="e0 05 ae 40 03 0c 69 31"
+19:12:43.018907 INFO Parsed wind direction luc=245 kabuki=65 rdsman=33 dekay=246 dario=242
+19:12:43.018916 INFO Saved wind data, will send soon windspeed=5 direction=65
+19:12:43.018927 INFO Rain click reading received raw_byte_data="e0 05 ae 40 03 0c 69 31" rainClicks=64
+19:12:45.580725 Hop: {ChannelIdx:28 ChannelFreq:916468351 FreqError:0 Transmitter:0}
+19:12:45.580785 INFO Processing message raw_message="50 05 a3 fe 73 01 97 11"
+19:12:45.580815 INFO Parsed wind direction luc=230 kabuki=50 rdsman=25 dekay=230 dario=228
+19:12:45.580827 INFO Saved wind data, will send soon windspeed=5 direction=50
+19:12:45.580841 INFO Rain rate reading received raw_byte_data="50 05 a3 fe 73 01 97 11"
+19:12:45.580853 INFO Light rain detected clicksPerHour=14.17322826385498
+19:12:45.580865 INFO Saved rain rate data, will send soon inchesPerHour=0.14173227548599243
+19:12:48.144690 Hop: {ChannelIdx:15 ChannelFreq:909945595 FreqError:0 Transmitter:0}
+19:12:48.144742 INFO Processing message raw_message="80 04 9d 1d e9 00 09 27"
+19:12:48.144787 INFO Parsed wind direction luc=221 kabuki=41 rdsman=20 dekay=222 dario=220
+19:12:48.144797 INFO Saved wind data, will send soon windspeed=4 direction=41
+19:12:48.144808 INFO Temperature reading received raw_byte_data="80 04 9d 1d e9 00 09 27"
+19:12:48.144821 INFO Saved temperature data, will send soon temp=47.79999923706055
+19:12:50.706019 Hop: {ChannelIdx:35 ChannelFreq:919980605 FreqError:0 Transmitter:0}
+19:12:50.714316 INFO Successfully POSTed weather data payload="{\"temperature\":{\"value\":47.8,\"received_at\":\"2026-01-10T19:12:48.144664-08:00\"},\"wind\":{\"speed\":4,\"direction\":41,\"received_at\":\"2026-01-10T19:12:48.144664-08:00\"},\"rain\":{\"inches_per_hour\":0.14173228,\"received_at\":\"2026-01-10T19:12:45.580693-08:00\"},\"capacitor\":null,\"sent_at\":\"2026-01-10T19:12:50.683129-08:00\"}"
+19:12:50.714342 INFO Clearing data
+19:12:50.714379 INFO Processing message raw_message="20 03 91 b9 81 8a 13 f4"
+19:12:50.714395 INFO Parsed wind direction luc=204 kabuki=24 rdsman=12 dekay=205 dario=203
+19:12:50.714403 INFO Saved wind data, will send soon windspeed=3 direction=24
+19:12:50.714411 INFO Parsed supercap voltage voltage=2.299999952316284
+19:12:50.714418 INFO Saved super capacitor data, will send soon voltage=2.299999952316284
+19:12:53.269785 Hop: {ChannelIdx:6 ChannelFreq:905429841 FreqError:0 Transmitter:0}
+19:12:53.269910 INFO Processing message raw_message="e0 03 93 40 01 0b a7 5e"
+19:12:53.269949 INFO Parsed wind direction luc=207 kabuki=27 rdsman=13 dekay=208 dario=206
+19:12:53.269961 INFO Saved wind data, will send soon windspeed=3 direction=27
+19:12:53.269979 INFO Rain click reading received raw_byte_data="e0 03 93 40 01 0b a7 5e" rainClicks=64
+19:12:55.831472 Hop: {ChannelIdx:40 ChannelFreq:922489357 FreqError:0 Transmitter:0}
+19:12:55.831532 INFO Processing message raw_message="50 06 a5 fe 71 03 18 7a"
+19:12:55.831551 INFO Parsed wind direction luc=232 kabuki=52 rdsman=26 dekay=233 dario=230
+19:12:55.831558 INFO Saved wind data, will send soon windspeed=6 direction=52
+19:12:55.831567 INFO Rain rate reading received raw_byte_data="50 06 a5 fe 71 03 18 7a"
+19:12:55.831573 INFO Light rain detected clicksPerHour=14.17322826385498
+19:12:55.831579 INFO Saved rain rate data, will send soon inchesPerHour=0.14173227548599243

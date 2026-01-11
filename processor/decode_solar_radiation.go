@@ -16,12 +16,14 @@ func DecodeSolarRadiation(m protocol.Message) (float32, error) {
 	// > Solar radiation = (byte3 << 8 + byte4) >> 6) * 1.757936
 	// >
 	// > Reference:
-	// > http: //www.wxforum.net/index.php?topic=18489.msg178506#msg178506
+	// > http://www.wxforum.net/index.php?topic=18489.msg178506#msg178506
 	// > Reference:
-	// > http: //www.wxforum.net/index.php?topic=18489.msg190548#msg190548
+	// > http://www.wxforum.net/index.php?topic=18489.msg190548#msg190548
 	//
-	// Dario says the bit is 0x07
+	// Dario says the bit is 0x07?
 	// https://github.com/dcbo/ISS-MQTT-Gateway/blob/master/src/main.cpp
+	//
+	// 1 W/m2
 
 	slog.Info("Solar reading received", "raw_byte_data", bytesToSpacedHex(m.Data))
 	if GetMessageType(m) != 0x06 {
