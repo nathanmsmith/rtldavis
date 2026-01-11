@@ -34,7 +34,7 @@ func DecodeSupercap(m protocol.Message) (float32, error) {
 		return -1, errors.New("message does not have supercap")
 	}
 
-	voltage := float32((m.Data[3]<<2)|((m.Data[4]&0xC0)>>6)) / 300
+	voltage := float32((m.Data[3]<<2)|((m.Data[4]&0xC0)>>6)) / 300.0
 
-	return float32(voltage), nil
+	return voltage, nil
 }

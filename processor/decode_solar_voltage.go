@@ -32,6 +32,6 @@ func DecodeSolarVoltage(m protocol.Message) (float32, error) {
 		return -1, errors.New("no sensor")
 	}
 
-	solarVoltage := float32((m.Data[3] << 2) | ((m.Data[4] & 0xC0) >> 6))
+	solarVoltage := float32((m.Data[3]<<2)|((m.Data[4]&0xC0)>>6)) / 300.0
 	return solarVoltage, nil
 }
