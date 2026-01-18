@@ -16,36 +16,43 @@ type WindDatum struct {
 	Speed      int16     `json:"speed"`
 	Direction  int16     `json:"direction"`
 	ReceivedAt time.Time `json:"received_at"`
+	RawMessage string    `json:"raw_message"`
 }
 
 type TemperatureDatum struct {
 	Value      float32   `json:"value"`
 	ReceivedAt time.Time `json:"received_at"`
+	RawMessage string    `json:"raw_message"`
 }
 
 type HumidityDatum struct {
 	Value      float32   `json:"value"`
 	ReceivedAt time.Time `json:"received_at"`
+	RawMessage string    `json:"raw_message"`
 }
 
 type RainRateDatum struct {
 	InchesPerHour float32   `json:"inches_per_hour"`
 	ReceivedAt    time.Time `json:"received_at"`
+	RawMessage    string    `json:"raw_message"`
 }
 
 type RainfallDatum struct {
 	TotalClicks int16     `json:"total_clicks"`
 	ReceivedAt  time.Time `json:"received_at"`
+	RawMessage  string    `json:"raw_message"`
 }
 
 type BatteryDatum struct {
 	Voltage    float32   `json:"voltage"`
 	ReceivedAt time.Time `json:"received_at"`
+	RawMessage string    `json:"raw_message"`
 }
 
 type SolarDatum struct {
 	Voltage    float32   `json:"voltage"`
 	ReceivedAt time.Time `json:"received_at"`
+	RawMessage string    `json:"raw_message"`
 }
 
 type WeatherDatum struct {
@@ -117,6 +124,7 @@ func (wp *WeatherProcessor) processMessages() {
 				Speed:      windSpeed,
 				Direction:  windDirection,
 				ReceivedAt: message.ReceivedAt,
+				RawMessage: bytesToSpacedHex(message.Data),
 			}
 			slog.Info("Saved wind data, will send soon", "windspeed", windSpeed, "direction", windDirection)
 
@@ -129,6 +137,7 @@ func (wp *WeatherProcessor) processMessages() {
 					wp.data.Battery = &BatteryDatum{
 						Voltage:    voltage,
 						ReceivedAt: message.ReceivedAt,
+						RawMessage: bytesToSpacedHex(message.Data),
 					}
 					slog.Info("Saved super capacitor data, will send soon", "voltage", voltage)
 				} else {
@@ -144,9 +153,10 @@ func (wp *WeatherProcessor) processMessages() {
 			case 0x05:
 				inchesPerHour, err := DecodeRainRate(message)
 				if err == nil {
-					wp.data.Rain = &RainDatum{
+					wp.data.RainRate = &RainRateDatum{
 						InchesPerHour: inchesPerHour,
 						ReceivedAt:    message.ReceivedAt,
+						RawMessage:    bytesToSpacedHex(message.Data),
 					}
 					slog.Info("Saved rain rate data, will send soon", "inchesPerHour", inchesPerHour)
 				} else {
@@ -166,6 +176,7 @@ func (wp *WeatherProcessor) processMessages() {
 					wp.data.Solar = &SolarDatum{
 						Voltage:    voltage,
 						ReceivedAt: message.ReceivedAt,
+						RawMessage: bytesToSpacedHex(message.Data),
 					}
 					slog.Info("Saved solar voltage data, will send soon", "voltage", voltage)
 				} else {
@@ -179,6 +190,7 @@ func (wp *WeatherProcessor) processMessages() {
 					wp.data.Temperature = &TemperatureDatum{
 						Value:      temperature,
 						ReceivedAt: message.ReceivedAt,
+						RawMessage: bytesToSpacedHex(message.Data),
 					}
 					slog.Info("Saved temperature data, will send soon", "temp", temperature)
 				} else {
@@ -194,6 +206,7 @@ func (wp *WeatherProcessor) processMessages() {
 					wp.data.Humidity = &HumidityDatum{
 						Value:      humidity,
 						ReceivedAt: message.ReceivedAt,
+						RawMessage: bytesToSpacedHex(message.Data),
 					}
 					slog.Info("Saved humidity data, will send soon", "temp", humidity)
 				} else {
@@ -207,6 +220,7 @@ func (wp *WeatherProcessor) processMessages() {
 					wp.data.Rainfall = &RainfallDatum{
 						TotalClicks: totalClicks,
 						ReceivedAt:  message.ReceivedAt,
+						RawMessage:  bytesToSpacedHex(message.Data),
 					}
 					slog.Info("Saved rainfall data, will send soon", "rainfallClicks", totalClicks)
 				} else {
