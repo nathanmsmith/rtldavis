@@ -28,9 +28,14 @@ type HumidityDatum struct {
 	ReceivedAt time.Time `json:"received_at"`
 }
 
-type RainDatum struct {
+type RainRateDatum struct {
 	InchesPerHour float32   `json:"inches_per_hour"`
 	ReceivedAt    time.Time `json:"received_at"`
+}
+
+type RainfallDatum struct {
+	TotalClicks int16     `json:"total_clicks"`
+	ReceivedAt  time.Time `json:"received_at"`
 }
 
 type BatteryDatum struct {
@@ -46,7 +51,8 @@ type SolarDatum struct {
 type WeatherDatum struct {
 	Temperature *TemperatureDatum `json:"temperature"`
 	Wind        *WindDatum        `json:"wind"`
-	Rain        *RainDatum        `json:"rain"`
+	RainRate    *RainRateDatum    `json:"rain_rate"`
+	Rainfall    *RainfallDatum    `json:"rainfall"`
 	Humidity    *HumidityDatum    `json:"humidity"`
 
 	Battery *BatteryDatum `json:"battery"`
@@ -196,8 +202,16 @@ func (wp *WeatherProcessor) processMessages() {
 
 			// Rain clicks
 			case 0x0E:
-				rainfall, err := DecodeRainfall(message)
-				slog.Warn("Decoded rainfall not saving yet", "rainfall", rainfall, "err", err)
+				totalClicks, err := DecodeRainfall(message)
+				if err == nil {
+					wp.data.Rainfall = &RainfallDatum{
+						TotalClicks: totalClicks,
+						ReceivedAt:  message.ReceivedAt,
+					}
+					slog.Info("Saved rainfall data, will send soon", "rainfallClicks", totalClicks)
+				} else {
+					slog.Error("Could not decode rainfall from packet", "error", err)
+				}
 
 			default:
 				slog.Info("Unknown message type", "raw_message", bytesToSpacedHex(message.Data), "message_type", GetMessageType(message))
