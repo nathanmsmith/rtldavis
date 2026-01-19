@@ -281,7 +281,9 @@ func main() {
 	// Handle frequency hops concurrently since the callback will stall if we
 	// stop reading to hop.
 	nextHop := make(chan protocol.Hop, 1)
+	hopDone := make(chan struct{})
 	go func() {
+		defer close(hopDone)
 		for hop := range nextHop {
 			freqCorr = hop.FreqCorr
 			if testFreq {
@@ -324,8 +326,11 @@ func main() {
 		// First, cancel async reading to stop the goroutine
 		dev.CancelAsync()
 
-		// Give goroutines time to finish
-		time.Sleep(100 * time.Millisecond)
+		// Close the hop channel to stop the frequency hopping goroutine
+		close(nextHop)
+
+		// Wait for hop goroutine to finish
+		<-hopDone
 
 		// Close pipes after async is cancelled
 		out.Close()
