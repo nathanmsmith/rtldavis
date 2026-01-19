@@ -321,12 +321,21 @@ func main() {
 	)
 
 	defer func() {
-		processor.Stop()
-		in.Close()
-		out.Close()
+		// First, cancel async reading to stop the goroutine
 		dev.CancelAsync()
+
+		// Give goroutines time to finish
+		time.Sleep(100 * time.Millisecond)
+
+		// Close pipes after async is cancelled
+		out.Close()
+		in.Close()
+
+		// Stop the processor and send final data
+		processor.Stop()
+
+		// Finally close the device
 		dev.Close()
-		os.Exit(0)
 	}()
 
 	sig := make(chan os.Signal, 1)

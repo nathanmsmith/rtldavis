@@ -93,10 +93,13 @@ func NewWeatherProcessor(serverURL string, apiKey string, interval time.Duration
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
 			Transport: &http.Transport{
-				DisableKeepAlives:   true,
-				MaxIdleConns:        10,
-				IdleConnTimeout:     30 * time.Second,
-				TLSHandshakeTimeout: 10 * time.Second,
+				MaxIdleConns:          100,
+				MaxIdleConnsPerHost:   10,
+				MaxConnsPerHost:       10,
+				IdleConnTimeout:       90 * time.Second,
+				TLSHandshakeTimeout:   10 * time.Second,
+				ExpectContinueTimeout: 1 * time.Second,
+				ForceAttemptHTTP2:     true,
 			},
 		},
 	}
