@@ -92,6 +92,12 @@ func NewWeatherProcessor(serverURL string, apiKey string, interval time.Duration
 		done:        make(chan struct{}),
 		httpClient: &http.Client{
 			Timeout: 10 * time.Second,
+			Transport: &http.Transport{
+				DisableKeepAlives:   true,
+				MaxIdleConns:        10,
+				IdleConnTimeout:     30 * time.Second,
+				TLSHandshakeTimeout: 10 * time.Second,
+			},
 		},
 	}
 
@@ -314,10 +320,17 @@ func (bp *WeatherProcessor) Stop() {
 	close(bp.done)
 
 	// Send any remaining messages
-	bp.mutex.Lock()
-	defer bp.mutex.Unlock()
-	if bp.hasSomeDataFields() {
-		bp.sendData()
+	func() {
+		bp.mutex.Lock()
+		defer bp.mutex.Unlock()
+		if bp.hasSomeDataFields() {
+			bp.sendData()
+		}
+	}()
+
+	// Close any idle connections
+	if transport, ok := bp.httpClient.Transport.(*http.Transport); ok {
+		transport.CloseIdleConnections()
 	}
 }
 

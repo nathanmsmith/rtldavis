@@ -321,6 +321,7 @@ func main() {
 	)
 
 	defer func() {
+		processor.Stop()
 		in.Close()
 		out.Close()
 		dev.CancelAsync()
