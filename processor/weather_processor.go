@@ -45,6 +45,7 @@ type RainfallDatum struct {
 
 type BatteryDatum struct {
 	Voltage    float32   `json:"voltage"`
+	IsLow      bool      `json:"is_low"`
 	ReceivedAt time.Time `json:"received_at"`
 	RawMessage string    `json:"raw_message"`
 }
@@ -145,10 +146,11 @@ func (wp *WeatherProcessor) processMessages() {
 				if err == nil {
 					wp.data.Battery = &BatteryDatum{
 						Voltage:    voltage,
+						IsLow:      message.BatteryLow,
 						ReceivedAt: message.ReceivedAt,
 						RawMessage: bytesToSpacedHex(message.Data),
 					}
-					slog.Info("Saved super capacitor data, will send soon", "voltage", voltage)
+					slog.Info("Saved super capacitor data, will send soon", "voltage", voltage, "battery_low", message.BatteryLow)
 				} else {
 					slog.Error("Could not decode temperature from packet", "error", err)
 				}
