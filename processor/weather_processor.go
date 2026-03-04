@@ -125,128 +125,137 @@ func (wp *WeatherProcessor) processMessages() {
 		select {
 		case message := <-wp.messageChan:
 			wp.mutex.Lock()
-
-			slog.Info("Processing message", "raw_message", bytesToSpacedHex(message.Data))
-
-			windSpeed := DecodeWindSpeed(message)
-			windDirection := DecodeWindDirection(message)
-			wp.data.Wind = &WindDatum{
-				Speed:      windSpeed,
-				Direction:  windDirection,
-				ReceivedAt: message.ReceivedAt,
-				RawMessage: bytesToSpacedHex(message.Data),
-			}
-			slog.Info("Saved wind data, will send soon", "windspeed", windSpeed, "direction", windDirection)
-
-			switch GetMessageType(message) {
-
-			// Super capacitor voltage
-			case 0x02:
-				voltage, err := DecodeSupercap(message)
-				if err == nil {
-					wp.data.Battery = &BatteryDatum{
-						Voltage:    voltage,
-						IsLow:      message.BatteryLow,
-						ReceivedAt: message.ReceivedAt,
-						RawMessage: bytesToSpacedHex(message.Data),
-					}
-					slog.Info("Saved super capacitor data, will send soon", "voltage", voltage, "battery_low", message.BatteryLow)
-				} else {
-					slog.Error("Could not decode temperature from packet", "error", err)
-				}
-
-			// UV Index
-			// https://github.com/dekay/DavisRFM69/wiki/Message-Protocol#message-4-uv-index
-			case 0x04:
-				slog.Error("Detected a UV Index reading. This is unexpected!!")
-
-			// Rain Rate
-			case 0x05:
-				inchesPerHour, err := DecodeRainRate(message)
-				if err == nil {
-					wp.data.RainRate = &RainRateDatum{
-						InchesPerHour: inchesPerHour,
-						ReceivedAt:    message.ReceivedAt,
-						RawMessage:    bytesToSpacedHex(message.Data),
-					}
-					slog.Info("Saved rain rate data, will send soon", "inchesPerHour", inchesPerHour)
-				} else {
-					slog.Error("Could not decode temperature from packet", "error", err)
-				}
-
-			case 0x06:
-				slog.Error("Detected a solar radiation reading. This is unexpected!!")
-
-			// todo: Solar radiation?
-			// https://github.com/dekay/DavisRFM69/wiki/Message-Protocol#message-6-solar-radiation
-			// Dario says it's 0x07, Dekay 0x06
-			// https://www.carluccio.de/davis-vue-hacking-part-2/
-			case 0x07:
-				voltage, err := DecodeSolarVoltage(message)
-				if err == nil {
-					wp.data.Solar = &SolarDatum{
-						Voltage:    voltage,
-						ReceivedAt: message.ReceivedAt,
-						RawMessage: bytesToSpacedHex(message.Data),
-					}
-					slog.Info("Saved solar voltage data, will send soon", "voltage", voltage)
-				} else {
-					slog.Error("Could not decode temperature from packet", "error", err)
-				}
-
-			// Temperature
-			case 0x08:
-				temperature, err := DecodeTemperature(message)
-				if err == nil {
-					wp.data.Temperature = &TemperatureDatum{
-						Value:      temperature,
-						ReceivedAt: message.ReceivedAt,
-						RawMessage: bytesToSpacedHex(message.Data),
-					}
-					slog.Info("Saved temperature data, will send soon", "temp", temperature)
-				} else {
-					slog.Error("Could not decode temperature from packet", "error", err)
-				}
-
-			// gust speed Msg-ID 0x9 (every 50 seconds):
-
-			// Humidity (every 50 seconds)
-			case 0x0A:
-				humidity, err := DecodeHumidity(message)
-				if err == nil {
-					wp.data.Humidity = &HumidityDatum{
-						Value:      humidity,
-						ReceivedAt: message.ReceivedAt,
-						RawMessage: bytesToSpacedHex(message.Data),
-					}
-					slog.Info("Saved humidity data, will send soon", "temp", humidity)
-				} else {
-					slog.Error("Could not decode humidity from packet", "error", err)
-				}
-
-			// Rain clicks
-			case 0x0E:
-				totalClicks, err := DecodeRainfall(message)
-				if err == nil {
-					wp.data.Rainfall = &RainfallDatum{
-						TotalClicks: totalClicks,
-						ReceivedAt:  message.ReceivedAt,
-						RawMessage:  bytesToSpacedHex(message.Data),
-					}
-					slog.Info("Saved rainfall data, will send soon", "rainfallClicks", totalClicks)
-				} else {
-					slog.Error("Could not decode rainfall from packet", "error", err)
-				}
-
-			default:
-				slog.Info("Unknown message type", "raw_message", bytesToSpacedHex(message.Data), "message_type", GetMessageType(message))
-			}
-
+			wp.handleMessage(message)
 			wp.mutex.Unlock()
 		case <-wp.done:
 			return
 		}
 	}
+}
+
+func (wp *WeatherProcessor) handleMessage(message protocol.Message) {
+	msgType := GetMessageType(message)
+	slog.Info("Processing message", "raw_message", bytesToSpacedHex(message.Data), "message_type", msgType)
+
+	windSpeed := DecodeWindSpeed(message)
+	windDirection := DecodeWindDirection(message)
+
+	switch msgType {
+
+	// Super capacitor voltage
+	case 0x02:
+		voltage, err := DecodeSupercap(message)
+		if err == nil {
+			wp.data.Battery = &BatteryDatum{
+				Voltage:    voltage,
+				IsLow:      message.BatteryLow,
+				ReceivedAt: message.ReceivedAt,
+				RawMessage: bytesToSpacedHex(message.Data),
+			}
+			slog.Info("Saved super capacitor data, will send soon", "voltage", voltage, "battery_low", message.BatteryLow)
+		} else {
+			slog.Error("Could not decode temperature from packet", "error", err)
+		}
+
+	// UV Index
+	// https://github.com/dekay/DavisRFM69/wiki/Message-Protocol#message-4-uv-index
+	case 0x04:
+		slog.Error("Detected a UV Index reading. This is unexpected!!")
+
+	// Rain Rate
+	case 0x05:
+		inchesPerHour, err := DecodeRainRate(message)
+		if err == nil {
+			wp.data.RainRate = &RainRateDatum{
+				InchesPerHour: inchesPerHour,
+				ReceivedAt:    message.ReceivedAt,
+				RawMessage:    bytesToSpacedHex(message.Data),
+			}
+			slog.Info("Saved rain rate data, will send soon", "inchesPerHour", inchesPerHour)
+		} else {
+			slog.Error("Could not decode temperature from packet", "error", err)
+		}
+
+	case 0x06:
+		slog.Error("Detected a solar radiation reading. This is unexpected!!")
+
+	// todo: Solar radiation?
+	// https://github.com/dekay/DavisRFM69/wiki/Message-Protocol#message-6-solar-radiation
+	// Dario says it's 0x07, Dekay 0x06
+	// https://www.carluccio.de/davis-vue-hacking-part-2/
+	case 0x07:
+		voltage, err := DecodeSolarVoltage(message)
+		if err == nil {
+			wp.data.Solar = &SolarDatum{
+				Voltage:    voltage,
+				ReceivedAt: message.ReceivedAt,
+				RawMessage: bytesToSpacedHex(message.Data),
+			}
+			slog.Info("Saved solar voltage data, will send soon", "voltage", voltage)
+		} else {
+			slog.Error("Could not decode temperature from packet", "error", err)
+		}
+
+	// Temperature
+	case 0x08:
+		temperature, err := DecodeTemperature(message)
+		if err == nil {
+			wp.data.Temperature = &TemperatureDatum{
+				Value:      temperature,
+				ReceivedAt: message.ReceivedAt,
+				RawMessage: bytesToSpacedHex(message.Data),
+			}
+			slog.Info("Saved temperature data, will send soon", "temp", temperature)
+		} else {
+			slog.Error("Could not decode temperature from packet", "error", err)
+		}
+
+	// gust speed Msg-ID 0x9 (every 50 seconds):
+
+	// Humidity (every 50 seconds)
+	case 0x0A:
+		humidity, err := DecodeHumidity(message)
+		if err == nil {
+			wp.data.Humidity = &HumidityDatum{
+				Value:      humidity,
+				ReceivedAt: message.ReceivedAt,
+				RawMessage: bytesToSpacedHex(message.Data),
+			}
+			slog.Info("Saved humidity data, will send soon", "temp", humidity)
+		} else {
+			slog.Error("Could not decode humidity from packet", "error", err)
+		}
+
+	case 0x0B:
+	// test message?
+
+	// Rain clicks
+	case 0x0E:
+		totalClicks, err := DecodeRainfall(message)
+		if err == nil {
+			wp.data.Rainfall = &RainfallDatum{
+				TotalClicks: totalClicks,
+				ReceivedAt:  message.ReceivedAt,
+				RawMessage:  bytesToSpacedHex(message.Data),
+			}
+			slog.Info("Saved rainfall data, will send soon", "rainfallClicks", totalClicks)
+		} else {
+			slog.Error("Could not decode rainfall from packet", "error", err)
+		}
+
+	default:
+		slog.Info("Unknown message type, skipping", "raw_message", bytesToSpacedHex(message.Data), "message_type", msgType)
+		return
+	}
+
+	// Only reached for recognized message types
+	wp.data.Wind = &WindDatum{
+		Speed:      windSpeed,
+		Direction:  windDirection,
+		ReceivedAt: message.ReceivedAt,
+		RawMessage: bytesToSpacedHex(message.Data),
+	}
+	slog.Info("Saved wind data, will send soon", "windspeed", windSpeed, "direction", windDirection)
 }
 
 func (bp *WeatherProcessor) sendDataPeriodically() {
