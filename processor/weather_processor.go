@@ -226,9 +226,6 @@ func (wp *WeatherProcessor) handleMessage(message protocol.Message) {
 			slog.Error("Could not decode humidity from packet", "error", err)
 		}
 
-	case 0x0B:
-	// test message?
-
 	// Rain clicks
 	case 0x0E:
 		totalClicks, err := DecodeRainfall(message)
