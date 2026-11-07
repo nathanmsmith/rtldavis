@@ -1,0 +1,9 @@
+# Settings for the rtldavis service. See `rtldavis -h` for all flags.
+# After editing, run: sudo systemctl restart rtldavis
+
+# Command-line flags, e.g. transmitter frequencies, transmitter IDs, and server URL
+RTLDAVIS_ARGS="-tf US -tr 1 -gs https://example.com/api/weather"
+
+# API key for the server. Kept here rather than in RTLDAVIS_ARGS so it doesn't
+# show up in the process list.
+RTLDAVIS_API_KEY=

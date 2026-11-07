@@ -1,0 +1,138 @@
+name: Debian packages
+
+on:
+  pull_request:
+  push:
+    tags: [ 'v*' ]
+
+env:
+  NFPM_VERSION: 2.47.0
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }} .deb
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+            nfpm_arch: x86_64
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+            nfpm_arch: arm64
+    runs-on: ${{ matrix.runner }}
+    container: debian:trixie
+    steps:
+    - name: Install build dependencies
+      run: |
+        apt-get update
+        apt-get install -y --no-install-recommends \
+          build-essential ca-certificates curl git librtlsdr-dev
+
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version-file: go.mod
+        cache: true
+
+    - name: Determine version
+      run: |
+        if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+          VERSION="${GITHUB_REF_NAME#v}"
+        else
+          # ~ sorts below any release, so PR builds never block an upgrade
+          VERSION="0.0.0~git$(echo "$GITHUB_SHA" | cut -c1-7)"
+        fi
+        echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+    - name: Build binary
+      env:
+        CGO_ENABLED: 1
+      run: |
+        go build -trimpath -buildvcs=false \
+          -ldflags "-s -w -X main.version=$VERSION" \
+          -o dist/rtldavis .
+
+    - name: Install nfpm
+      run: |
+        tarball="nfpm_${NFPM_VERSION}_Linux_${{ matrix.nfpm_arch }}.tar.gz"
+        base="https://github.com/goreleaser/nfpm/releases/download/v${NFPM_VERSION}"
+        cd "$RUNNER_TEMP"
+        curl -fsSLO "$base/$tarball"
+        curl -fsSLO "$base/checksums.txt"
+        grep " $tarball\$" checksums.txt | sha256sum -c -
+        tar -xzf "$tarball" nfpm
+        mv nfpm /usr/local/bin/
+
+    - name: Package
+      env:
+        GOARCH: ${{ matrix.arch }}
+      run: nfpm package --packager deb --target dist/
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: deb-${{ matrix.arch }}
+        path: dist/*.deb
+        if-no-files-found: error
+
+  smoke-test:
+    name: Smoke test ${{ matrix.arch }} .deb
+    needs: build
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-latest
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    container: debian:trixie
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: deb-${{ matrix.arch }}
+
+    - name: Install package
+      run: |
+        apt-get update
+        apt-get install -y ./rtldavis_*.deb
+
+    - name: Check installation
+      run: |
+        rtldavis -version
+        id rtldavis
+        id -nG rtldavis | grep -qw plugdev
+        test -f /usr/lib/systemd/system/rtldavis.service
+        test "$(stat -c %a /etc/default/rtldavis)" = 600
+        test -f /etc/modprobe.d/rtldavis-blacklist.conf
+
+    - name: Remove package
+      run: |
+        apt-get remove -y rtldavis
+        test ! -e /usr/bin/rtldavis
+
+  release:
+    name: Publish GitHub release
+    if: github.ref_type == 'tag'
+    needs: smoke-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: deb-*
+        merge-multiple: true
+
+    - name: Create release
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        sha256sum *.deb > SHA256SUMS
+        gh release create "$GITHUB_REF_NAME" \
+          --repo "$GITHUB_REPOSITORY" \
+          --title "$GITHUB_REF_NAME" \
+          --generate-notes \
+          *.deb SHA256SUMS

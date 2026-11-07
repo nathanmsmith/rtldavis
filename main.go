@@ -52,6 +52,9 @@ import (
 // nms: max transmitter?
 const maxTr = 8
 
+// version is set at build time with -ldflags "-X main.version=..."
+var version = "dev"
+
 var (
 	// program settings
 	ex              int     // -ex = extra loopTime in msex
@@ -125,10 +128,10 @@ var (
 )
 
 func init() {
-	VERSION := "0.15.2nms"
 	var (
-		tr   int
-		mask int
+		tr          int
+		mask        int
+		showVersion bool
 	)
 	msgIdToChan = []int{9, 9, 9, 9, 9, 9, 9, 9} // preset with 9 (= undefined)
 	receiveWindow = 300                         // in ms
@@ -153,12 +156,24 @@ func init() {
 	disableAfc = flag.Bool("noafc", false, "disable any AFC")
 	deviceString = flag.String("d", "0", "device serial number or device index")
 	serverSrv = flag.String("gs", "", "decode packets and send to server server")
-	apiKey = flag.String("ak", "", "api key for sending data to server")
+	apiKey = flag.String("ak", "", "api key for sending data to server (default $RTLDAVIS_API_KEY)")
+	flag.BoolVar(&showVersion, "version", false, "print version and exit")
 
 	flag.Parse()
+
+	if showVersion {
+		fmt.Println(version)
+		os.Exit(0)
+	}
+
+	// Prefer the environment so the key doesn't show up in the process list
+	if *apiKey == "" {
+		*apiKey = os.Getenv("RTLDAVIS_API_KEY")
+	}
+
 	protocol.Verbose = *verbose
 
-	log.Printf("rtldavis.go VERSION=%s", VERSION)
+	log.Printf("rtldavis.go VERSION=%s", version)
 	// convert tranceiver code to act channels
 	mask = 1
 	for i := range actChan {

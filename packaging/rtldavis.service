@@ -1,0 +1,26 @@
+[Unit]
+Description=Davis weather station receiver
+Documentation=https://github.com/nathanmsmith/rtldavis
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=rtldavis
+Group=rtldavis
+SupplementaryGroups=plugdev
+EnvironmentFile=/etc/default/rtldavis
+ExecStart=/usr/bin/rtldavis $RTLDAVIS_ARGS
+Restart=on-failure
+RestartSec=10s
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+
+[Install]
+WantedBy=multi-user.target
