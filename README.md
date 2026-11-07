@@ -30,6 +30,30 @@ Tested and used on a Davis Vantage Vue. Installed on macOS, using go 1.24.0.
 
 ## Installation
 
+### Debian (Trixie)
+
+Download the `.deb` for your architecture (amd64 or arm64) from the
+[latest release](https://github.com/nathanmsmith/rtldavis/releases/latest), then:
+
+```
+sudo apt install ./rtldavis_*.deb
+```
+
+This installs a `rtldavis` systemd service, which is not enabled by default. To set it up:
+
+1. Put your flags and API key in `/etc/default/rtldavis`.
+2. Reboot so the blacklisted DVB-T kernel driver releases the dongle.
+3. Run `sudo systemctl enable --now rtldavis`.
+
+Logs are available with `journalctl -u rtldavis -f`.
+
+### Releasing
+
+Push a semver tag such as `v0.1.0`. The workflow in `.github/workflows/release.yml` builds and
+smoke-tests the `.deb`s, then publishes them to a GitHub release.
+
+### macOS
+
 ```
 brew install librtlsdr
 git clone https://github.com/nathanmsmith/rtldavis/

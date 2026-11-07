@@ -1,0 +1,49 @@
+# Debian package definition. Built in CI by .github/workflows/release.yml;
+# expects VERSION and GOARCH in the environment and the binary at dist/rtldavis.
+name: rtldavis
+arch: ${GOARCH}
+platform: linux
+version: ${VERSION}
+version_schema: none
+release: "1"
+section: hamradio
+priority: optional
+maintainer: Nathan Smith <anthropic@nathansmith.io>
+description: |
+  Davis weather station receiver for RTL-SDR dongles
+  Listens to Davis Instruments wireless weather stations with an RTL-SDR
+  dongle, decodes the sensor packets, and uploads them to a server.
+homepage: https://github.com/nathanmsmith/rtldavis
+license: GPL-3.0-or-later
+
+depends:
+  - librtlsdr0
+
+contents:
+  - src: dist/rtldavis
+    dst: /usr/bin/rtldavis
+    file_info:
+      mode: 0755
+
+  - src: packaging/rtldavis.service
+    dst: /usr/lib/systemd/system/rtldavis.service
+    file_info:
+      mode: 0644
+
+  # Holds the API key; systemd reads it as root before dropping privileges
+  - src: packaging/rtldavis.default
+    dst: /etc/default/rtldavis
+    type: config|noreplace
+    file_info:
+      mode: 0600
+
+  - src: packaging/rtldavis-blacklist.conf
+    dst: /etc/modprobe.d/rtldavis-blacklist.conf
+    type: config|noreplace
+    file_info:
+      mode: 0644
+
+scripts:
+  postinstall: packaging/postinst.sh
+  preremove: packaging/prerm.sh
+  postremove: packaging/postrm.sh
