@@ -70,15 +70,13 @@ d - unknown
 
 256 bits, could wind speed be a nibble? To 127mph?
 
-Wind speed does seem to be a nibble. The `b8` sequence, from earlier to
-later:
+* No. `30 86 e3 de 51 3b 1b cc`, `20 79 7d 2b a3 81 44 b2` occur around 0mph
+  wind readings otherwise.
 
-```
-80 00 9c 1e 8b 07 b2 6a
-e0 00 9c 1f 03 0a 99 de
-b8 a0 80 a4 f8 42 92 00
-e0 00 b1 1f 03 04 76 d8
-80 00 b1 1e 8b 09 5d 6c
-```
+Claude's idea (which I buy):
+> **Most likely cause:** Your station is picking up a **co-channel interferer** — another device transmitting on the same frequency (common in the 433 MHz or 915 MHz ISM bands that weather stations use). The collision produces a garbled packet that your decoder interprets as a valid frame with wild values, and the resulting desynchronization causes the gap. Alternatively, the weather station itself could be sending a different message type periodically (like a battery status or sensor ID broadcast) that your decoder is misinterpreting as a wind packet.
 
-Wind speed would stay 0 on the lower nibble.
+Looking at the messages, ~half have `8` in the lower nibble of byte 1, ~half
+have `0`. The 8s are definitely interference, the 0s could be.
+
+TODO: add station check and sanity validations to wind speed
